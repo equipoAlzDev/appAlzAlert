@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pruebavercel/screens/profile/medical_info_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
 
@@ -12,14 +13,15 @@ class ProfileSetupScreen extends StatefulWidget {
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _ageController = TextEditingController();
+  final _birthDateController = TextEditingController();
   final _addressController = TextEditingController();
+  DateTime? _selectedDate;
   String? _profileImageUrl;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _ageController.dispose();
+    _birthDateController.dispose();
     _addressController.dispose();
     super.dispose();
   }
@@ -31,6 +33,35 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         context,
         MaterialPageRoute(builder: (context) => const MedicalInfoScreen()),
       );
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      locale: const Locale('es', 'ES'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppTheme.primaryBlue,
+              onPrimary: AppTheme.primaryWhite,
+              onSurface: AppTheme.textDark,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _birthDateController.text = DateFormat('dd/MM/yyyy').format(picked);
+      });
     }
   }
 
@@ -111,18 +142,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
-                  controller: _ageController,
-                  keyboardType: TextInputType.number,
+                  controller: _birthDateController,
+                  readOnly: true,
                   decoration: const InputDecoration(
-                    labelText: 'Edad',
+                    labelText: 'Fecha de nacimiento',
                     prefixIcon: Icon(Icons.calendar_today),
+                    hintText: 'DD/MM/AAAA',
                   ),
+                  onTap: () => _selectDate(context),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa tu edad';
-                    }
-                    if (int.tryParse(value) == null) {
-                      return 'Ingresa un número válido';
+                      return 'Por favor selecciona tu fecha de nacimiento';
                     }
                     return null;
                   },
@@ -157,5 +187,270 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       ),
     );
   }
+} */
+
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:pruebavercel/screens/profile/medical_info_screen.dart';
+import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:pruebavercel/providers/user_provider.dart'; // Importamos el provider
+
+class ProfileSetupScreen extends StatefulWidget {
+  const ProfileSetupScreen({super.key});
+
+  @override
+  State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
 }
 
+class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _birthDateController = TextEditingController();
+  final _addressController = TextEditingController();
+  DateTime? _selectedDate;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Cargamos los datos del usuario si existen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.loadUserData().then((_) {
+        // Si ya hay datos, los cargamos en los controladores
+        final user = userProvider.user;
+        _nameController.text = user.name;
+        if (user.birthDate != null) {
+          _selectedDate = user.birthDate;
+          _birthDateController.text = DateFormat('dd/MM/yyyy').format(user.birthDate!);
+        }
+        _addressController.text = user.address;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _birthDateController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveAndContinue() async {
+    if (_formKey.currentState!.validate()) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      
+      // Mostramos un indicador de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+      
+      try {
+        // Guardamos los datos usando el provider
+        await userProvider.updatePersonalInfo(
+          name: _nameController.text.trim(),
+          birthDate: _selectedDate,
+          address: _addressController.text.trim(),
+          profileImageUrl: userProvider.user.profileImageUrl,
+        );
+        
+        // Cerramos el diálogo de carga
+        if (mounted) Navigator.of(context).pop();
+        
+        // Navegamos a la siguiente pantalla
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const MedicalInfoScreen()),
+          );
+        }
+      } catch (e) {
+        // Cerramos el diálogo de carga
+        if (mounted) Navigator.of(context).pop();
+        
+        // Mostramos un mensaje de error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar los datos: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      locale: const Locale('es', 'ES'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppTheme.primaryBlue,
+              onPrimary: AppTheme.primaryWhite,
+              onSurface: AppTheme.textDark,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        _birthDateController.text = DateFormat('dd/MM/yyyy').format(picked);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Usamos Consumer para acceder al estado del usuario
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Datos Personales'),
+          ),
+          body: SafeArea(
+            child: userProvider.isLoading && _nameController.text.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Información Personal',
+                            style: Theme.of(context).textTheme.displaySmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Esta información es importante para identificarte en caso de emergencia',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 24),
+                          Center(
+                            child: Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 60,
+                                  backgroundColor: AppTheme.divider,
+                                  backgroundImage: userProvider.user.profileImageUrl != null
+                                      ? NetworkImage(userProvider.user.profileImageUrl!)
+                                      : null,
+                                  child: userProvider.user.profileImageUrl == null
+                                      ? const Icon(
+                                          Icons.person,
+                                          size: 60,
+                                          color: AppTheme.textLight,
+                                        )
+                                      : null,
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: CircleAvatar(
+                                    backgroundColor: AppTheme.primaryBlue,
+                                    radius: 20,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.camera_alt,
+                                        color: AppTheme.primaryWhite,
+                                      ),
+                                      onPressed:(){},
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: 'Nombre completo',
+                              prefixIcon: Icon(Icons.person_outline),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingresa tu nombre';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: _birthDateController,
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Fecha de nacimiento',
+                              prefixIcon: Icon(Icons.calendar_today),
+                              hintText: 'DD/MM/AAAA',
+                            ),
+                            onTap: () => _selectDate(context),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor selecciona tu fecha de nacimiento';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: _addressController,
+                            decoration: const InputDecoration(
+                              labelText: 'Dirección',
+                              prefixIcon: Icon(Icons.home_outlined),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingresa tu dirección';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 40),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: userProvider.isLoading ? null : _saveAndContinue,
+                              child: userProvider.isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppTheme.primaryWhite,
+                                      ),
+                                    )
+                                  : const Text('Continuar'),
+                            ),
+                          ),
+                          if (userProvider.error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: Text(
+                                userProvider.error!,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        );
+      },
+    );
+  }
+}

@@ -68,13 +68,6 @@ class WelcomeScreen extends StatelessWidget {
                   child: const Text('Registrarse'),
                 ),
               ),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () {
-                  // Implementar recuperación de contraseña
-                },
-                child: const Text('¿Olvidaste tu contraseña?'),
-              ),
             ],
           ),
         ),

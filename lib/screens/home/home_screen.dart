@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pruebavercel/screens/alerts/alert_config_screen.dart';
 import 'package:pruebavercel/screens/contacts/emergency_contacts_screen.dart';
 import 'package:pruebavercel/screens/history/location_history_screen.dart';
 import 'package:pruebavercel/screens/notifications/notifications_screen.dart';
 import 'package:pruebavercel/screens/profile/profile_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
+
+import '../../providers/user_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -171,11 +174,17 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Bienvenido, Usuario',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            Text('Bienvenido,'),
+                            Consumer<UserProvider>(
+                              builder: (context, userProvider, _) {
+                                final name = userProvider.user.name;
+                                return Text(
+                                  '${name.isNotEmpty ? name : 'Usuario'}',
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 4),
                             Row(

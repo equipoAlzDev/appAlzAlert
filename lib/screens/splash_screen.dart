@@ -35,13 +35,14 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.health_and_safety,
+              Icons.fmd_good_outlined,
+              // Icons.fmd_good_sharp,
               size: 100,
               color: AppTheme.primaryWhite,
             ),
             const SizedBox(height: 24),
             Text(
-              'Alzheimer Care',
+              'AlzAlert',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: AppTheme.primaryWhite,
                     fontWeight: FontWeight.bold,
