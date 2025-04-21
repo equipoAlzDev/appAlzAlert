@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1018854347695",
+    "project_id": "prototipo-b13dc",
+    "storage_bucket": "prototipo-b13dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018854347695:android:e7a1e3bcbf2666940f155a",
+        "android_client_info": {
+          "package_name": "com.example.pruebavercel"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZvYdfavewZALL2h-JwZWlS7a8brJIsNE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

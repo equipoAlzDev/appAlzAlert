@@ -15,14 +15,15 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.health_and_safety,
-                size: 80,
-                color: AppTheme.primaryBlue,
+              Image.asset(
+                'assets/logo.png',
+                width: 120,
+                height: 100,
+                fit: BoxFit.fill,
               ),
               const SizedBox(height: 24),
               Text(
-                'Bienvenido a Alzheimer Care',
+                'Bienvenido a AlzAlert',
                 style: Theme.of(context).textTheme.displayMedium,
                 textAlign: TextAlign.center,
               ),
@@ -32,9 +33,10 @@ class WelcomeScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 28),
               SizedBox(
-                width: double.infinity,
+                // width: double.infinity,
+                width: 300,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
@@ -48,7 +50,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               SizedBox(
-                width: double.infinity,
+                width: 300,
                 height: 56,
                 child: OutlinedButton(
                   onPressed: () {
