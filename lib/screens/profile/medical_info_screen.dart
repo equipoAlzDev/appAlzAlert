@@ -198,43 +198,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                     labelText: 'Alergias',
                     prefixIcon: Icon(Icons.warning_amber_outlined),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Médico tratante',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _doctorNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre del médico',
-                    prefixIcon: Icon(Icons.person_outline),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa el nombre del médico';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _doctorPhoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Teléfono del médico',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa el teléfono del médico';
-                    }
-                    return null;
-                  },
-                ),
+                ),            
                 const SizedBox(height: 40),
                 SizedBox(
                   width: double.infinity,

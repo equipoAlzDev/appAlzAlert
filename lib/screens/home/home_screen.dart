@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pruebavercel/screens/alerts/alert_config_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pruebavercel/providers/user_provider.dart';
+import 'package:pruebavercel/screens/alerts/alert_CONFIG_screen.dart';
 import 'package:pruebavercel/screens/contacts/emergency_contacts_screen.dart';
 import 'package:pruebavercel/screens/history/location_history_screen.dart';
 import 'package:pruebavercel/screens/notifications/notifications_screen.dart';
 import 'package:pruebavercel/screens/profile/profile_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
-
-import '../../providers/user_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,7 +18,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  bool _isAlertSystemActive = true;
+
+  // Carga inicial de datos del usuario
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).loadUserData();
+    });
+  }
 
   final List<Widget> _screens = [
     const MainHomeScreen(),
@@ -88,7 +96,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     setState(() {
       _isAlertSystemActive = !_isAlertSystemActive;
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -119,7 +127,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 backgroundColor: AppTheme.secondaryRed,
               ),
               onPressed: () {
-                // Implementar envío de alerta
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -175,14 +182,16 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Bienvenido,'),
+                            // Mostrar nombre cargado del provider
                             Consumer<UserProvider>(
                               builder: (context, userProvider, _) {
                                 final name = userProvider.user.name;
                                 return Text(
                                   '${name.isNotEmpty ? name : 'Usuario'}',
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 );
                               },
                             ),
@@ -307,4 +316,3 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 }
-

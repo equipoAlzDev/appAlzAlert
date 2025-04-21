@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:pruebavercel/screens/home/home_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
+
+import '../../providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,6 +49,9 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        await userProvider.loadUserData();
 
         if (mounted) {
           // Si el inicio de sesión es exitoso, navegar a la pantalla principal

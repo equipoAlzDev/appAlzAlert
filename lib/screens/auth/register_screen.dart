@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:pruebavercel/screens/profile/profile_setup_screen.dart';
+
+import '../../providers/user_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -61,6 +64,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _passwordErrorMessage = null;
       _confirmPasswordErrorMessage = null;
     });
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await userProvider.loadUserData();
     
     if (_formKey.currentState!.validate()) {
       if (!_acceptTerms) {
