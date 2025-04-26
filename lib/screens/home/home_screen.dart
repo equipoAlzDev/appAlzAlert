@@ -9,6 +9,8 @@ import 'package:pruebavercel/screens/profile/profile_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
 import 'package:telephony/telephony.dart';
 
+import '../../providers/contacto_emergencia_provider.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -92,6 +94,7 @@ class MainHomeScreen extends StatefulWidget {
 class _MainHomeScreenState extends State<MainHomeScreen> {
   bool _isAlertSystemActive = true;
   bool _isSendingSMS = false;
+  bool _contactosCargados = false;
   final Telephony telephony = Telephony.instance;
   final String _emergencyNumber = "3157042961";
 
@@ -99,6 +102,19 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   void initState() {
     super.initState();
     _initializeTelephony();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    final userId = Provider.of<UserProvider>(context, listen: false).user?.id ?? '';
+    if (userId.isNotEmpty) {
+      await Provider.of<ContactoEmergenciaProvider>(context, listen: false)
+          .cargarContactos(userId);
+      if (mounted) {
+        setState(() {
+          _contactosCargados = true;
+        });
+      }
+    }
+  });
   }
 
   Future<void> _initializeTelephony() async {
@@ -138,18 +154,53 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       }
 
       // Obtener nombre del usuario
-      final userName = Provider.of<UserProvider>(context, listen: false).user.name;
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final userName = userProvider.user?.name ?? '';
+      final userId = userProvider.user?.id ?? '';
       
-      // Enviar SMS
-      await telephony.sendSms(
-        to: _emergencyNumber,
-        message: '¡EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente',
-      );
+      // Obtener contactos de emergencia
+      final contactosProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
+      final contactos = contactosProvider.contactos.where((c) => c.userId == userId).toList();
+      
+      // Mensaje de emergencia
+      final message = '¡EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente';
+      
+      // Si hay contactos, enviar a todos ellos (primero al contacto primario si existe)
+      if (contactos.isNotEmpty) {
+        // Buscar si hay un contacto primario
+        final contactoPrimario = contactos.firstWhere(
+          (c) => c.isPrimary, 
+          orElse: () => contactos.first // Si no hay primario, usar el primero
+        );
+        
+        // Enviar primero al contacto principal o al primero de la lista
+        await telephony.sendSms(
+          to: contactoPrimario.phone,
+          message: message,
+        );
+        
+        // Luego enviar a los demás contactos (si hay más de uno)
+        for (final contacto in contactos) {
+          // Omitir el que ya se envió
+          if (contacto.id != contactoPrimario.id) {
+            await telephony.sendSms(
+              to: contacto.phone,
+              message: message,
+            );
+          }
+        }
+      } else {
+        // Si no hay contactos registrados, usar el número predeterminado
+        await telephony.sendSms(
+          to: _emergencyNumber,
+          message: message,
+        );
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Alerta enviada al contacto de emergencia'),
+            content: Text('Alerta enviada a contactos de emergencia'),
             backgroundColor: Colors.green,
           ),
         );
@@ -191,6 +242,17 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   void _showEmergencyConfirmation() {
     bool alertSent = false;
     
+    // Obtener información de contactos para mostrar en el mensaje
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.id ?? '';
+    final contactosProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
+    final contactos = contactosProvider.contactos.where((c) => c.userId == userId).toList();
+    
+    // Texto para mostrar a quién se enviará la alerta
+    final String destinatarioText = contactos.isNotEmpty 
+        ? '${contactos.length} contacto${contactos.length > 1 ? 's' : ''} de emergencia'
+        : 'número de emergencia predeterminado';
+    
     showDialog(
       context: context,
       builder: (context) {
@@ -207,7 +269,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('¿Enviar alerta a tu contacto de emergencia?'),
+              Text('¿Enviar alerta a $destinatarioText?'),
               const SizedBox(height: 8),
               Text(
                 'Se enviará automáticamente en 10 segundos',
