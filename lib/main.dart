@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:pruebavercel/providers/contacto_emergencia_provider.dart';
 import 'package:pruebavercel/screens/splash_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,6 +24,7 @@ void main() async{
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
       ],
       child: const MyApp(),
     ),
