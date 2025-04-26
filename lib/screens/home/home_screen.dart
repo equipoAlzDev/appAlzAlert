@@ -246,7 +246,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alzheimer Care'),
+        title: const Text('AlzAlert'),
         actions: [
           Switch(
             value: _isAlertSystemActive,
@@ -378,12 +378,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 25),
               if (_isAlertSystemActive)
                 Card(
                   color: AppTheme.primaryBlue.withOpacity(0.1),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(30.0),
                     child: Row(
                       children: [
                         Icon(
@@ -404,7 +404,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'El botón de emergencia está habilitado',
+                                'Recibirás alertas periódicas para verificar tu estado.',
                                 style: TextStyle(
                                   color: AppTheme.primaryBlue,
                                 ),
