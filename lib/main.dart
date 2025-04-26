@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:pruebavercel/providers/alert_system_provider.dart';
 import 'package:pruebavercel/providers/contacto_emergencia_provider.dart';
 import 'package:pruebavercel/screens/splash_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
@@ -25,6 +26,7 @@ void main() async{
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
+        ChangeNotifierProvider(create: (_) => AlertSystemProvider()),
       ],
       child: const MyApp(),
     ),
