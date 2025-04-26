@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pruebavercel/providers/user_provider.dart';
 import 'package:pruebavercel/screens/alerts/alert_CONFIG_screen.dart';
-import 'package:pruebavercel/screens/contacts/emergency_contacts_screen.dart';
 import 'package:pruebavercel/screens/history/location_history_screen.dart';
 import 'package:pruebavercel/screens/notifications/notifications_screen.dart';
 import 'package:pruebavercel/screens/profile/profile_screen.dart';
 import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:telephony/telephony.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,6 +91,23 @@ class MainHomeScreen extends StatefulWidget {
 
 class _MainHomeScreenState extends State<MainHomeScreen> {
   bool _isAlertSystemActive = true;
+  bool _isSendingSMS = false;
+  final Telephony telephony = Telephony.instance;
+  final String _emergencyNumber = "3157042961";
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTelephony();
+  }
+
+  Future<void> _initializeTelephony() async {
+    // Verificar si el dispositivo puede enviar SMS
+    final bool? canSendSms = await telephony.requestPhoneAndSmsPermissions;
+    if (canSendSms != true) {
+      debugPrint('El dispositivo no puede enviar SMS');
+    }
+  }
 
   void _toggleAlertSystem() {
     setState(() {
@@ -104,22 +121,108 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               ? 'Sistema de alertas activado'
               : 'Sistema de alertas desactivado',
         ),
-        backgroundColor:
-            _isAlertSystemActive ? AppTheme.secondaryGreen : AppTheme.secondaryRed,
+        backgroundColor: _isAlertSystemActive ? AppTheme.secondaryGreen : AppTheme.secondaryRed,
       ),
     );
   }
 
+  Future<void> _sendEmergencySMS() async {
+    setState(() {
+      _isSendingSMS = true;
+    });
+
+    try {
+      // Verificar permisos
+      if (!await _checkSMSPermissions()) {
+        return;
+      }
+
+      // Obtener nombre del usuario
+      final userName = Provider.of<UserProvider>(context, listen: false).user.name;
+      
+      // Enviar SMS
+      await telephony.sendSms(
+        to: _emergencyNumber,
+        message: '¡EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Alerta enviada al contacto de emergencia'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al enviar alerta: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingSMS = false;
+        });
+      }
+    }
+  }
+
+  Future<bool> _checkSMSPermissions() async {
+    // Verificar permiso para SMS
+    var smsStatus = await Permission.sms.status;
+    if (!smsStatus.isGranted) {
+      smsStatus = await Permission.sms.request();
+    }
+
+    // Verificar permiso para teléfono (necesario para Telephony)
+    var phoneStatus = await Permission.phone.status;
+    if (!phoneStatus.isGranted) {
+      phoneStatus = await Permission.phone.request();
+    }
+
+    return smsStatus.isGranted && phoneStatus.isGranted;
+  }
+
   void _showEmergencyConfirmation() {
+    bool alertSent = false;
+    
     showDialog(
       context: context,
       builder: (context) {
+      
+        Future.delayed(const Duration(seconds: 10), () {
+          if (!alertSent && Navigator.canPop(context)) {
+            Navigator.pop(context);
+            _sendEmergencySMS();
+          }
+        });
+
         return AlertDialog(
           title: const Text('Confirmar Emergencia'),
-          content: const Text('¿Enviar alerta a tus contactos de emergencia?'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('¿Enviar alerta a tu contacto de emergencia?'),
+              const SizedBox(height: 8),
+              Text(
+                'Se enviará automáticamente en 10 segundos',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.secondaryRed,
+                ),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                alertSent = true;
+                Navigator.pop(context);
+              },
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
@@ -127,15 +230,11 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 backgroundColor: AppTheme.secondaryRed,
               ),
               onPressed: () {
+                alertSent = true;
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Alerta enviada a tus contactos de emergencia'),
-                    backgroundColor: AppTheme.secondaryRed,
-                  ),
-                );
+                _sendEmergencySMS();
               },
-              child: const Text('Enviar Alerta'),
+              child: const Text('Enviar Ahora'),
             ),
           ],
         );
@@ -147,7 +246,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Alzheimer Care'),
+        title: const Text('AlzAlert'),
         actions: [
           Switch(
             value: _isAlertSystemActive,
@@ -181,8 +280,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Bienvenido,'),
-                            // Mostrar nombre cargado del provider
+                            const Text('Bienvenido,'),
                             Consumer<UserProvider>(
                               builder: (context, userProvider, _) {
                                 final name = userProvider.user.name;
@@ -234,12 +332,15 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
-                        onTap: _showEmergencyConfirmation,
-                        child: Container(
+                        onTap: _isSendingSMS ? null : _showEmergencyConfirmation,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
                           width: 200,
                           height: 200,
                           decoration: BoxDecoration(
-                            color: AppTheme.secondaryRed,
+                            color: _isSendingSMS
+                                ? AppTheme.secondaryRed.withOpacity(0.7)
+                                : AppTheme.secondaryRed,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -249,21 +350,27 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               ),
                             ],
                           ),
-                          child: const Center(
-                            child: Text(
-                              'EMERGENCIA',
-                              style: TextStyle(
-                                color: AppTheme.primaryWhite,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          child: Center(
+                            child: _isSendingSMS
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    'EMERGENCIA',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Presiona el botón en caso de emergencia',
+                        _isSendingSMS
+                            ? 'Enviando alerta...'
+                            : 'Presiona el botón en caso de emergencia',
                         style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -271,12 +378,12 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 25),
               if (_isAlertSystemActive)
                 Card(
                   color: AppTheme.primaryBlue.withOpacity(0.1),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(30.0),
                     child: Row(
                       children: [
                         Icon(
@@ -297,7 +404,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Recibirás alertas periódicas para verificar tu estado',
+                                'Recibirás alertas periódicas para verificar tu estado.',
                                 style: TextStyle(
                                   color: AppTheme.primaryBlue,
                                 ),
