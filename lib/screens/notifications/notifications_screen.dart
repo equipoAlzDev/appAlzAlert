@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:AlzAlert/theme/app_theme.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});

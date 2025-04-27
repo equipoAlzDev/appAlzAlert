@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:pruebavercel/screens/home/home_screen.dart';
-import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:AlzAlert/screens/home/home_screen.dart';
+import 'package:AlzAlert/theme/app_theme.dart';
 
 import '../../providers/user_provider.dart';
 

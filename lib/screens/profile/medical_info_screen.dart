@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pruebavercel/screens/contacts/emergency_contacts_screen.dart';
-import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:AlzAlert/screens/contacts/emergency_contacts_screen.dart';
+import 'package:AlzAlert/theme/app_theme.dart';
 
 class MedicalInfoScreen extends StatefulWidget {
   const MedicalInfoScreen({super.key});

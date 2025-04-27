@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pruebavercel/models/user_model.dart';
+import 'package:AlzAlert/models/user_model.dart';
 
 class UserProvider extends ChangeNotifier {
   UserModel _user = UserModel.empty();

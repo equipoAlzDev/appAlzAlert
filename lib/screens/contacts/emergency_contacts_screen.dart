@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pruebavercel/models/contacto_emergencia_model.dart';
-import 'package:pruebavercel/providers/contacto_emergencia_provider.dart';
-import 'package:pruebavercel/providers/user_provider.dart';
+import 'package:AlzAlert/models/contacto_emergencia_model.dart';
+import 'package:AlzAlert/providers/contacto_emergencia_provider.dart';
+import 'package:AlzAlert/providers/user_provider.dart';
 
 class EmergencyContactsScreen extends StatefulWidget {
   const EmergencyContactsScreen({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pruebavercel/screens/auth/login_screen.dart';
-import 'package:pruebavercel/screens/auth/register_screen.dart';
-import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:AlzAlert/screens/auth/login_screen.dart';
+import 'package:AlzAlert/screens/auth/register_screen.dart';
+import 'package:AlzAlert/theme/app_theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

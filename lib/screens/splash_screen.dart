@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pruebavercel/screens/auth/welcome_screen.dart';
-import 'package:pruebavercel/theme/app_theme.dart';
+import 'package:AlzAlert/screens/auth/welcome_screen.dart';
+import 'package:AlzAlert/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
