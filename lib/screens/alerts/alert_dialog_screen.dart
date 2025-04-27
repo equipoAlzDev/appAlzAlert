@@ -9,7 +9,8 @@ import 'package:AlzAlert/providers/user_provider.dart';
 import 'package:AlzAlert/providers/contacto_emergencia_provider.dart';
 
 class AlertDialogScreen extends StatefulWidget {
-  const AlertDialogScreen({super.key});
+  final bool isRetry;
+  const AlertDialogScreen({super.key, this.isRetry = false});
 
   @override
   State<AlertDialogScreen> createState() => _AlertDialogScreenState();
@@ -17,7 +18,7 @@ class AlertDialogScreen extends StatefulWidget {
 
 class _AlertDialogScreenState extends State<AlertDialogScreen> {
   // Establecemos el temporizador a 60 segundos (1 minuto)
-  int _remainingSeconds = 60;
+  late int _remainingSeconds;
   Timer? _countdownTimer;
   bool _isSendingSMS = false;
   final Telephony telephony = Telephony.instance;
@@ -25,9 +26,11 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
   
   @override
   void initState() {
+    _remainingSeconds = widget.isRetry ? 60 : 60; //tiempo de espera para que el usuario responda
+
     super.initState();
     // Iniciar sonido de alerta (puedes implementar esto más adelante)
-    
+
     // Iniciar el temporizador de cuenta regresiva una única vez
     _startCountdownTimer();
     
@@ -44,22 +47,26 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
   }
 
   void _startCountdownTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          if (_remainingSeconds > 0) {
-            _remainingSeconds--; // Decrementa normalmente
-          } else {
-            timer.cancel();
-            _respondNo(); // Cierra al llegar a 0
-          }
-        });
-      } else {
-        timer.cancel();
-      }
-    });
-  }
+      _countdownTimer?.cancel();
+      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            if (_remainingSeconds > 0) {
+              _remainingSeconds--;
+            } else {
+              timer.cancel();
+              if (widget.isRetry) {
+                _sendEmergencySMS().then((_) => Navigator.pop(context, 'final_timeout'));
+              } else {
+                Navigator.pop(context, 'timeout');
+              }
+            }
+          });
+        } else {
+          timer.cancel();
+        }
+      });
+    }
 
   void _respondYes() {
     // Cancelamos el temporizador para evitar fugas de memoria
@@ -75,14 +82,11 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
     Navigator.of(context).pop();
   }
 
- void _respondNo() async {
+  void _respondNo() async {
     _countdownTimer?.cancel();
-    
-    // Enviar SMS antes de cerrar la pantalla
     await _sendEmergencySMS();
-    
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.pop(context, 'manual_no');
     }
   }
 
@@ -179,11 +183,13 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
                   ),
                   const SizedBox(height: 32),
                   Text(
-                    '¿Te encuentras bien?',
+                    widget.isRetry 
+                      ? '¡Última verificación!\n¿Te encuentras bien?'
+                      : '¿Te encuentras bien?',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          color: AppTheme.primaryWhite,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: AppTheme.primaryWhite,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),

@@ -343,6 +343,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 value: isAlertSystemActive,
                 onChanged: (_) => _toggleAlertSystem(context),
                 activeColor: AppTheme.secondaryGreen,
+                inactiveThumbColor: const Color.fromARGB(255, 200, 200, 200),
+                inactiveTrackColor: Colors.grey[500],
               ),
             ],
           ),
