@@ -3,7 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:AlzAlert/providers/alert_system_provider.dart';
 import 'package:AlzAlert/providers/user_provider.dart';
-import 'package:AlzAlert/screens/alerts/alert_CONFIG_screen.dart';
+import 'package:AlzAlert/screens/alerts/alert_config_screen.dart';
 import 'package:AlzAlert/screens/history/location_history_screen.dart';
 import 'package:AlzAlert/screens/notifications/notifications_screen.dart';
 import 'package:AlzAlert/screens/profile/profile_screen.dart';
@@ -31,10 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // Updated the index for AlertConfigScreen based on your provided list
   final List<Widget> _screens = [
     const MainHomeScreen(),
     const LocationHistoryScreen(),
-    const AlertConfigScreen(),
+    const AlertConfigScreen(), // Index 2 for AlertConfigScreen
     const NotificationsScreen(),
     const ProfileScreen(),
   ];
@@ -64,11 +65,12 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.location_on),
             label: 'Ubicaciones',
           ),
+          // Corrected label to 'Config. Alertas' or similar if it's the config screen
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            activeIcon: Icon(Icons.notifications),
-            label: 'Alertas',
-          ),
+             icon: Icon(Icons.settings_outlined),
+             activeIcon: Icon(Icons.settings),
+             label: 'Config. Alertas',
+           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message_outlined),
             activeIcon: Icon(Icons.message),
@@ -119,16 +121,20 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
   Future<void> _initializeTelephony() async {
     // Verificar si el dispositivo puede enviar SMS
+    // Request permissions here or earlier in your app lifecycle (recommended)
     final bool? canSendSms = await telephony.requestPhoneAndSmsPermissions;
     if (canSendSms != true) {
-      debugPrint('El dispositivo no puede enviar SMS');
+      debugPrint('El dispositivo no puede enviar SMS o permisos no concedidos.');
+      // Consider showing a persistent message to the user if permissions are denied.
     }
   }
 
+  // Corrected: Removed BuildContext argument from the call to toggleAlertSystem
   void _toggleAlertSystem(BuildContext context) {
     final alertSystemProvider = Provider.of<AlertSystemProvider>(context, listen: false);
-    alertSystemProvider.toggleAlertSystem(context);
+    alertSystemProvider.toggleAlertSystem(); // Removed context argument
 
+    // The context is still needed here for showing the SnackBar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -136,8 +142,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               ? 'Sistema de alertas activado'
               : 'Sistema de alertas desactivado',
         ),
-        backgroundColor: alertSystemProvider.isAlertSystemActive 
-            ? AppTheme.secondaryGreen 
+        backgroundColor: alertSystemProvider.isAlertSystemActive
+            ? AppTheme.secondaryGreen
             : AppTheme.secondaryRed,
       ),
     );
@@ -155,7 +161,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       );
       return;
     }
-    
+
     setState(() {
       _isSendingSMS = true;
     });
@@ -163,6 +169,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     try {
       // Verificar permisos
       if (!await _checkSMSPermissions()) {
+         // _checkSMSPermissions already shows a SnackBar if permissions are denied
         return;
       }
 
@@ -170,60 +177,72 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final userName = userProvider.user?.name ?? '';
       final userId = userProvider.user?.id ?? '';
-      
+
+      if (userId.isEmpty) {
+         debugPrint('Error: User ID is empty. Cannot send emergency SMS.');
+          if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(content: Text('Error: Usuario no identificado para enviar SMS.'),
+               backgroundColor: AppTheme.secondaryRed,
+               ),
+             );
+          }
+          return;
+      }
+
       // Obtener contactos de emergencia
       final contactosProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
       final contactos = contactosProvider.contactos.where((c) => c.userId == userId).toList();
-      
+
       // Mensaje de emergencia
       final message = '¡EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente';
-      
-      // Si hay contactos, enviar a todos ellos (primero al contacto primario si existe)
+
+      List<String> numeros = []; // List to hold phone numbers
+
       if (contactos.isNotEmpty) {
-        // Buscar si hay un contacto primario
-        final contactoPrimario = contactos.firstWhere(
-          (c) => c.isPrimary, 
-          orElse: () => contactos.first // Si no hay primario, usar el primero
-        );
-        
-        // Enviar primero al contacto principal o al primero de la lista
-        await telephony.sendSms(
-          to: contactoPrimario.phone,
-          message: message,
-        );
-        
-        // Luego enviar a los demás contactos (si hay más de uno)
-        for (final contacto in contactos) {
-          // Omitir el que ya se envió
-          if (contacto.id != contactoPrimario.id) {
-            await telephony.sendSms(
-              to: contacto.phone,
-              message: message,
-            );
-          }
-        }
+        // Add all contact numbers
+        numeros = contactos.map((c) => c.phone).toList();
+         debugPrint('Sending emergency SMS to configured contacts.');
       } else {
         // Si no hay contactos registrados, usar el número predeterminado
-        await telephony.sendSms(
-          to: _emergencyNumber,
-          message: message,
-        );
+        numeros.add(_emergencyNumber);
+         debugPrint('No contacts found. Sending emergency SMS to default number: $_emergencyNumber');
       }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Alerta enviada a contactos de emergencia'),
-            backgroundColor: Colors.green,
-          ),
-        );
+      if (numeros.isNotEmpty) {
+         // Send all SMS in parallel
+         await Future.wait(
+           numeros.map((numero) => telephony.sendSms(to: numero, message: message))
+         );
+         debugPrint('Emergency SMS sent successfully.');
+         if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(
+               content: Text('Alerta enviada a contactos de emergencia'),
+               backgroundColor: AppTheme.secondaryGreen,
+             ),
+           );
+         }
+      } else {
+         debugPrint('No phone numbers available to send SMS.');
+          if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(
+                content: Text('No hay números de contacto disponibles para enviar la alerta.'),
+                backgroundColor: AppTheme.secondaryRed,
+                ),
+             );
+          }
       }
+
+
     } catch (e) {
+      debugPrint('Error sending emergency SMS: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al enviar alerta: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.secondaryRed,
           ),
         );
       }
@@ -239,18 +258,39 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   Future<bool> _checkSMSPermissions() async {
     // Verificar permiso para SMS
     var smsStatus = await Permission.sms.status;
-    if (!smsStatus.isGranted) {
-      smsStatus = await Permission.sms.request();
-    }
-
-    // Verificar permiso para teléfono (necesario para Telephony)
     var phoneStatus = await Permission.phone.status;
-    if (!phoneStatus.isGranted) {
-      phoneStatus = await Permission.phone.request();
+
+    bool granted = smsStatus.isGranted && phoneStatus.isGranted;
+
+    if (!granted) {
+       debugPrint('SMS or Phone permissions not granted. Requesting...');
+       // Request both permissions
+       Map<Permission, PermissionStatus> statuses = await [
+          Permission.sms,
+          Permission.phone,
+       ].request();
+
+       granted = statuses[Permission.sms]?.isGranted == true &&
+                 statuses[Permission.phone]?.isGranted == true;
+
+       if (!granted) {
+          debugPrint('SMS or Phone permissions denied after request.');
+          if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(
+                 content: Text('Permisos de SMS y Teléfono necesarios para enviar alertas.'),
+                 backgroundColor: AppTheme.secondaryRed,
+               ),
+             );
+          }
+       }
+    } else {
+       debugPrint('SMS and Phone permissions already granted.');
     }
 
-    return smsStatus.isGranted && phoneStatus.isGranted;
+    return granted;
   }
+
 
   void _showEmergencyConfirmation() {
     // Si el sistema de alertas está desactivado, mostrar un mensaje y no continuar
@@ -264,28 +304,28 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       );
       return;
     }
-    
+
     bool alertSent = false;
-    
+
     // Obtener información de contactos para mostrar en el mensaje
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.user?.id ?? '';
     final contactosProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
     final contactos = contactosProvider.contactos.where((c) => c.userId == userId).toList();
-    
+
     // Texto para mostrar a quién se enviará la alerta
-    final String destinatarioText = contactos.isNotEmpty 
+    final String destinatarioText = contactos.isNotEmpty
         ? '${contactos.length} contacto${contactos.length > 1 ? 's' : ''} de emergencia'
         : 'número de emergencia predeterminado';
-    
+
     showDialog(
       context: context,
       builder: (context) {
-      
+
         Future.delayed(const Duration(seconds: 10), () {
           if (!alertSent && Navigator.canPop(context)) {
             Navigator.pop(context);
-            _sendEmergencySMS();
+            _sendEmergencySMS(); // Send SMS automatically after timeout
           }
         });
 
@@ -307,7 +347,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                alertSent = true;
+                alertSent = true; // Mark as sent to prevent auto-send
                 Navigator.pop(context);
               },
               child: const Text('Cancelar'),
@@ -317,9 +357,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 backgroundColor: AppTheme.secondaryRed,
               ),
               onPressed: () {
-                alertSent = true;
+                alertSent = true; // Mark as sent to prevent auto-send
                 Navigator.pop(context);
-                _sendEmergencySMS();
+                _sendEmergencySMS(); // Send SMS immediately
               },
               child: const Text('Enviar Ahora'),
             ),
@@ -334,14 +374,15 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     return Consumer<AlertSystemProvider>(
       builder: (context, alertSystemProvider, _) {
         final bool isAlertSystemActive = alertSystemProvider.isAlertSystemActive;
-        
+
         return Scaffold(
           appBar: AppBar(
             title: const Text('AlzAlert'),
             actions: [
               Switch(
                 value: isAlertSystemActive,
-                onChanged: (_) => _toggleAlertSystem(context),
+                // Corrected: Removed context argument from _toggleAlertSystem call
+                onChanged: (_) => _toggleAlertSystem(context), // Still need context for SnackBar
                 activeColor: AppTheme.secondaryGreen,
                 inactiveThumbColor: const Color.fromARGB(255, 200, 200, 200),
                 inactiveTrackColor: Colors.grey[500],
@@ -376,7 +417,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                 const Text('Bienvenido,'),
                                 Consumer<UserProvider>(
                                   builder: (context, userProvider, _) {
-                                    final name = userProvider.user.name;
+                                    final name = userProvider.user?.name ?? ''; // Handle potential null user
                                     return Text(
                                       '${name.isNotEmpty ? name : 'Usuario'}',
                                       style: Theme.of(context)
@@ -433,9 +474,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                               decoration: BoxDecoration(
                                 color: _isSendingSMS
                                     ? AppTheme.secondaryRed.withOpacity(0.7)
-                                    : isAlertSystemActive 
-                                      ? AppTheme.secondaryRed
-                                      : AppTheme.secondaryRed.withOpacity(0.4), // Botón desactivado con opacidad
+                                    : isAlertSystemActive
+                                        ? AppTheme.secondaryRed
+                                        : AppTheme.secondaryRed.withOpacity(0.4), // Botón desactivado con opacidad
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(

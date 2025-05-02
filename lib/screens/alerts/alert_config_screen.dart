@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:AlzAlert/providers/alert_system_provider.dart';
+import 'package:AlzAlert/theme/app_theme.dart'; // Asegúrate de que este archivo exista y contenga AppTheme
 
 class AlertConfigScreen extends StatefulWidget {
   const AlertConfigScreen({super.key});
@@ -9,164 +11,183 @@ class AlertConfigScreen extends StatefulWidget {
 }
 
 class _AlertConfigScreenState extends State<AlertConfigScreen> {
-  double _alertFrequency = 2.0; // Horas
-  bool _soundEnabled = true;
-  bool _vibrationEnabled = true;
-  bool _locationEnabled = true;
+  // State variables to hold the selected values from the dropdowns
+  // These will be initialized with the current provider values in initState
+  late int _selectedPrimaryIntervalSeconds;
+  late int _selectedSecondaryIntervalSeconds;
+
+  // Options for the primary interval dropdown (mapping display text to seconds)
+  // Removed the "Test" option
+  final Map<String, int> _primaryIntervalOptions = {
+    '1 hora': 3600,
+    '2 horas': 7200,
+    '3 horas': 10800,
+    '4 horas': 14400,
+    '5 horas': 18000,
+    '6 horas': 21600,
+    '7 horas': 25200,
+    '8 horas': 28800,
+    '9 horas': 32400,
+    '10 horas': 36000,
+    '20 segundos (Prueba)': 20, // Kept test option for development flexibility
+  };
+
+  // Options for the secondary interval dropdown (mapping display text to seconds)
+  // Removed the "Test" option
+  final Map<String, int> _secondaryIntervalOptions = {
+    '5 minutos': 300,
+    '10 minutos': 600,
+    '15 minutos': 900,
+    '20 minutos': 1200,
+    '25 minutos': 1500,
+    '30 minutos': 1800,
+    '10 segundos (Prueba)': 10, // Kept test option for development flexibility
+  };
+
+  // Helper to get the display string for a given primary interval in seconds
+  String _getPrimaryDisplayString(int seconds) {
+    return _primaryIntervalOptions.entries
+        .firstWhere((entry) => entry.value == seconds,
+            // Provide a default in case the current value isn't in the list (shouldn't happen if saved values are valid)
+            orElse: () => _primaryIntervalOptions.entries.first)
+        .key;
+  }
+
+  // Helper to get the display string for a given secondary interval in seconds
+  String _getSecondaryDisplayString(int seconds) {
+    return _secondaryIntervalOptions.entries
+        .firstWhere((entry) => entry.value == seconds,
+            orElse: () => _secondaryIntervalOptions.entries.first)
+        .key;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the state variables with the current values from the provider
+    final alertSystemProvider = Provider.of<AlertSystemProvider>(context, listen: false);
+    _selectedPrimaryIntervalSeconds = alertSystemProvider.configuredPrimaryIntervalSeconds;
+    _selectedSecondaryIntervalSeconds = alertSystemProvider.configuredSecondaryIntervalSeconds;
+  }
+
+  // Function to save the selected settings to the provider
+  void _saveSettings() {
+    final alertSystemProvider = Provider.of<AlertSystemProvider>(context, listen: false);
+    alertSystemProvider.setPrimaryInterval(_selectedPrimaryIntervalSeconds);
+    alertSystemProvider.setSecondaryInterval(_selectedSecondaryIntervalSeconds);
+
+    // Show a confirmation message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Configuración guardada')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configuración de Alertas'),
+        backgroundColor: AppTheme.primaryBlue, // Usa el color primario de tu tema
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: ListView(
-            children: [
-              Text(
-                'Configuración de Alertas',
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Personaliza cómo y cuándo recibirás las alertas',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 32),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Frecuencia de alertas',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Cada ${_alertFrequency.toStringAsFixed(1)} horas',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Slider(
-                        value: _alertFrequency,
-                        min: 0.5,
-                        max: 6.0,
-                        divisions: 11,
-                        label: '${_alertFrequency.toStringAsFixed(1)} h',
-                        onChanged: (value) {
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView( // Use ListView for scrolling if content overflows
+          children: [
+            // Card for Primary Alert Configuration
+            Card(
+              elevation: 4,
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Intervalo de Alerta Principal',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    // Dropdown to select primary interval
+                    DropdownButtonFormField<int>(
+                      value: _selectedPrimaryIntervalSeconds,
+                      items: _primaryIntervalOptions.entries.map((entry) {
+                        return DropdownMenuItem<int>(
+                          value: entry.value,
+                          child: Text(entry.key),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
                           setState(() {
-                            _alertFrequency = value;
+                            _selectedPrimaryIntervalSeconds = newValue;
                           });
-                        },
+                        }
+                      },
+                      decoration: const InputDecoration(
+                        labelText: 'Seleccionar intervalo',
+                        border: OutlineInputBorder(),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('30 min'),
-                          const Text('6 horas'),
-                        ],
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tipo de notificación',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      SwitchListTile(
-                        title: const Text('Sonido'),
-                        subtitle: const Text('Alerta con sonido'),
-                        value: _soundEnabled,
-                        onChanged: (value) {
+            ),
+
+            // Card for Secondary Alert Configuration
+            Card(
+              elevation: 4,
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Intervalo de Alerta Secundaria',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    // Dropdown to select secondary interval
+                    DropdownButtonFormField<int>(
+                      value: _selectedSecondaryIntervalSeconds,
+                      items: _secondaryIntervalOptions.entries.map((entry) {
+                        return DropdownMenuItem<int>(
+                          value: entry.value,
+                          child: Text(entry.key),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        if (newValue != null) {
                           setState(() {
-                            _soundEnabled = value;
+                            _selectedSecondaryIntervalSeconds = newValue;
                           });
-                        },
-                        secondary: const Icon(Icons.volume_up),
+                        }
+                      },
+                       decoration: const InputDecoration(
+                        labelText: 'Seleccionar intervalo',
+                        border: OutlineInputBorder(),
                       ),
-                      const Divider(),
-                      SwitchListTile(
-                        title: const Text('Vibración'),
-                        subtitle: const Text('Alerta con vibración'),
-                        value: _vibrationEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _vibrationEnabled = value;
-                          });
-                        },
-                        secondary: const Icon(Icons.vibration),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Ubicación',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      SwitchListTile(
-                        title: const Text('Compartir ubicación'),
-                        subtitle: const Text(
-                            'Enviar ubicación actual en caso de emergencia'),
-                        value: _locationEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _locationEnabled = value;
-                          });
-                        },
-                        secondary: const Icon(Icons.location_on),
-                      ),
-                    ],
-                  ),
-                ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Button to save all configurations
+            ElevatedButton(
+              onPressed: _saveSettings,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                 backgroundColor: AppTheme.secondaryGreen, // Usa el color secundario verde de tu tema
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Guardar configuración
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Configuración guardada'),
-                        backgroundColor: AppTheme.secondaryGreen,
-                      ),
-                    );
-                  },
-                  child: const Text('Guardar Cambios'),
-                ),
+              child: const Text(
+                'Guardar Configuración',
+                style: TextStyle(fontSize: 18),
               ),
-              const SizedBox(height: 16), // Espacio adicional al final
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -10,6 +10,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'providers/user_provider.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
@@ -26,7 +28,7 @@ void main() async{
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
-        ChangeNotifierProvider(create: (_) => AlertSystemProvider()),
+        ChangeNotifierProvider(create: (_) => AlertSystemProvider(navigatorKey)),
       ],
       child: const MyApp(),
     ),
@@ -52,6 +54,7 @@ class MyApp extends StatelessWidget {
         Locale('en', 'US'), // Inglés (opcional)
       ],
       locale: const Locale('es', 'ES'),
+      navigatorKey: navigatorKey,
       home: const SplashScreen(),
     );
   }
