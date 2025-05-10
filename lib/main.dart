@@ -1,3 +1,4 @@
+import 'package:AlzAlert/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -12,23 +13,23 @@ import 'providers/user_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
-        ChangeNotifierProvider(create: (_) => AlertSystemProvider(navigatorKey)),
+        ChangeNotifierProvider(
+          create: (_) => AlertSystemProvider(navigatorKey),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -55,8 +56,7 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('es', 'ES'),
       navigatorKey: navigatorKey,
-      home: const SplashScreen(),
+      home: const HomeScreen(),
     );
   }
 }
-
