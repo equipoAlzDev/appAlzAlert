@@ -1,6 +1,6 @@
 {
-    "name": "pruebavercel",
-    "short_name": "pruebavercel",
+    "name": "AlzAlert",
+    "short_name": "AlzAlert",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
