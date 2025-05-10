@@ -1,4 +1,4 @@
-package com.example.pruebavercel
+package com.example.AlzAlert
 
 import io.flutter.embedding.android.FlutterActivity
 
