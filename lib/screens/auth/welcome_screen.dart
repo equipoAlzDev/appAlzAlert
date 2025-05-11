@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:AlzAlert/screens/auth/login_screen.dart';
-import 'package:AlzAlert/screens/auth/register_screen.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/screens/auth/login_screen.dart';
+import 'package:alzalert/screens/auth/register_screen.dart';
+import 'package:alzalert/theme/app_theme.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -23,7 +23,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Bienvenido a AlzAlert',
+                'Bienvenido a alzalert',
                 style: Theme.of(context).textTheme.displayMedium,
                 textAlign: TextAlign.center,
               ),

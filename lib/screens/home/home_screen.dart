@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:AlzAlert/providers/alert_system_provider.dart';
-import 'package:AlzAlert/providers/user_provider.dart';
-import 'package:AlzAlert/screens/alerts/alert_config_screen.dart';
-import 'package:AlzAlert/screens/history/location_history_screen.dart';
-import 'package:AlzAlert/screens/notifications/notifications_screen.dart';
-import 'package:AlzAlert/screens/profile/profile_screen.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/providers/alert_system_provider.dart';
+import 'package:alzalert/providers/user_provider.dart';
+import 'package:alzalert/screens/alerts/alert_config_screen.dart';
+import 'package:alzalert/screens/history/location_history_screen.dart';
+import 'package:alzalert/screens/notifications/notifications_screen.dart';
+import 'package:alzalert/screens/profile/profile_screen.dart';
+import 'package:alzalert/theme/app_theme.dart';
 import 'package:telephony/telephony.dart';
 
 import '../../providers/contacto_emergencia_provider.dart';
@@ -377,7 +377,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('AlzAlert'),
+            title: const Text('alzalert'),
             actions: [
               Switch(
                 value: isAlertSystemActive,

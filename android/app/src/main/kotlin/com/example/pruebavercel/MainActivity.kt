@@ -1,4 +1,4 @@
-package com.example.AlzAlert
+package com.example.alzalert
 
 import io.flutter.embedding.android.FlutterActivity
 

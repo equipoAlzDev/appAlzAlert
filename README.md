@@ -1,4 +1,4 @@
-# AlzAlert
+# alzalert
 
 A new Flutter project.
 

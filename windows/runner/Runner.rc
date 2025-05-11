@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "AlzAlert" "\0"
+            VALUE "FileDescription", "alzalert" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "AlzAlert" "\0"
+            VALUE "InternalName", "alzalert" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "AlzAlert.exe" "\0"
-            VALUE "ProductName", "AlzAlert" "\0"
+            VALUE "OriginalFilename", "alzalert.exe" "\0"
+            VALUE "ProductName", "alzalert" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

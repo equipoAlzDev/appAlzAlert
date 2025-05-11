@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/theme/app_theme.dart';
 
 class LockScreenInfo extends StatefulWidget {
   const LockScreenInfo({super.key});

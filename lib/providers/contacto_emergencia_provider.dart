@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:AlzAlert/models/contacto_emergencia_model.dart';
+import 'package:alzalert/models/contacto_emergencia_model.dart';
 
 class ContactoEmergenciaProvider extends ChangeNotifier {
   final List<ContactoEmergenciaModel> _contactos = [];

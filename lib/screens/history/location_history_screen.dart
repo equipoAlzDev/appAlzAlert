@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/theme/app_theme.dart';
 
 class LocationHistoryScreen extends StatefulWidget {
   const LocationHistoryScreen({super.key});

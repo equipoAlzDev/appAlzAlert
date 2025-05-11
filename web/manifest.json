@@ -1,6 +1,6 @@
 {
-    "name": "AlzAlert",
-    "short_name": "AlzAlert",
+    "name": "alzalert",
+    "short_name": "alzalert",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

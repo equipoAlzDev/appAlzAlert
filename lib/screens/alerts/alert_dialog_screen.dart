@@ -1,12 +1,12 @@
 /* import 'dart:async';
-import 'package:AlzAlert/providers/user_provider.dart';
+import 'package:alzalert/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:AlzAlert/providers/alert_system_provider.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/providers/alert_system_provider.dart';
+import 'package:alzalert/theme/app_theme.dart';
 import 'package:telephony/telephony.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:AlzAlert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/contacto_emergencia_provider.dart';
 
 // Remove the global declaration of navigatorKey here.
 // It's no longer needed in this file.
@@ -342,11 +342,11 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:AlzAlert/providers/alert_system_provider.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/providers/alert_system_provider.dart';
+import 'package:alzalert/theme/app_theme.dart';
 import 'package:telephony/telephony.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:AlzAlert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/contacto_emergencia_provider.dart';
 
 // Remove the global declaration of navigatorKey here.
 // It's no longer needed in this file.

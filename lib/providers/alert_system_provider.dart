@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:AlzAlert/providers/contacto_emergencia_provider.dart';
-import 'package:AlzAlert/providers/user_provider.dart';
+import 'package:alzalert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/alerts/alert_dialog_screen.dart';
@@ -294,8 +294,8 @@ class AlertSystemProvider with ChangeNotifier {
 
 
 /* import 'dart:async';
-import 'package:AlzAlert/providers/contacto_emergencia_provider.dart';
-import 'package:AlzAlert/providers/user_provider.dart';
+import 'package:alzalert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/alerts/alert_dialog_screen.dart';

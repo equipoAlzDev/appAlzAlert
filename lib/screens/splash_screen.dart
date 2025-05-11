@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:AlzAlert/screens/auth/welcome_screen.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
+import 'package:alzalert/screens/auth/welcome_screen.dart';
+import 'package:alzalert/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'AlzAlert',
+              'alzalert',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: AppTheme.primaryWhite,
                     fontWeight: FontWeight.bold,

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:AlzAlert/screens/auth/welcome_screen.dart';
-import 'package:AlzAlert/screens/contacts/emergency_contacts_screen.dart';
-import 'package:AlzAlert/screens/profile/medical_info_screen.dart';
-import 'package:AlzAlert/screens/profile/profile_setup_screen.dart';
-import 'package:AlzAlert/theme/app_theme.dart';
-import 'package:AlzAlert/providers/user_provider.dart';
+import 'package:alzalert/screens/auth/welcome_screen.dart';
+import 'package:alzalert/screens/contacts/emergency_contacts_screen.dart';
+import 'package:alzalert/screens/profile/medical_info_screen.dart';
+import 'package:alzalert/screens/profile/profile_setup_screen.dart';
+import 'package:alzalert/theme/app_theme.dart';
+import 'package:alzalert/providers/user_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

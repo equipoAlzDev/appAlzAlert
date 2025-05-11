@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:AlzAlert/providers/alert_system_provider.dart';
-import 'package:AlzAlert/theme/app_theme.dart'; // Asegúrate de que este archivo exista y contenga AppTheme
+import 'package:alzalert/providers/alert_system_provider.dart';
+import 'package:alzalert/theme/app_theme.dart'; // Asegúrate de que este archivo exista y contenga AppTheme
 
 class AlertConfigScreen extends StatefulWidget {
   const AlertConfigScreen({super.key});
