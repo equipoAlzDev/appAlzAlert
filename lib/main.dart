@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('es', 'ES'),
       navigatorKey: navigatorKey,
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
