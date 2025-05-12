@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:alzalert/providers/alert_system_provider.dart';
@@ -99,6 +100,11 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   bool _contactosCargados = false;
   final Telephony telephony = Telephony.instance;
   final String _emergencyNumber = "3157042961";
+  // Variable para almacenar la ubicación capturada
+ String _currentLocationString = '';
+
+ // Getter para la ubicación capturada (aunque solo se usará internamente para imprimir)
+ String get currentLocationString => _currentLocationString;
 
   @override
   void initState() {
@@ -149,6 +155,46 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
+  // Method to capture the current location
+  Future<void> _captureCurrentLocation() async {
+    try {
+    // Verificar si los servicios de ubicación están habilitados
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      debugPrint('Servicios de ubicación deshabilitados.');
+      _currentLocationString = 'Error: Servicios de ubicación deshabilitados.';
+      return; // No se puede obtener la ubicación si el servicio está deshabilitado
+    }
+
+    // Verificar el estado del permiso de ubicación
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      debugPrint('Permisos de ubicación denegados.');
+      _currentLocationString = 'Error: Permisos de ubicación denegados.';
+      // En una app de producción, aquí se podría considerar solicitar el permiso de nuevo
+      return;
+    }
+    if (permission == LocationPermission.deniedForever) {
+      debugPrint('Permisos de ubicación permanentemente denegados.');
+      _currentLocationString = 'Error: Permisos de ubicación permanentemente denegados.';
+      return; // Permisos denegados permanentemente, no se puede solicitar
+    }
+
+    // Obtener la posición actual con alta precisión
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+
+    // Formatear y almacenar la ubicación
+    _currentLocationString = '${position.latitude},${position.longitude}';
+    debugPrint('Ubicación capturada: $_currentLocationString'); // Imprimir en consola
+    } catch (e) {
+    debugPrint('Error al capturar la ubicación: $e');
+    _currentLocationString = 'Error al capturar ubicación: ${e.toString()}';
+    }
+    // No es necesario llamar notifyListeners aquí, ya que la UI no mostrará esta variable directamente
+    // La ubicación se captura cuando se activa el diálogo.
+  }
+
   Future<void> _sendEmergencySMS() async {
     // Verificar si el sistema está activo antes de continuar
     final alertSystemProvider = Provider.of<AlertSystemProvider>(context, listen: false);
@@ -195,8 +241,14 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       final contactos = contactosProvider.contactos.where((c) => c.userId == userId).toList();
 
       // Mensaje de emergencia
-      final message = '¡EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente';
+      String mensaje = 'EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente';
 
+      // Agregar ubicación si disponible, en formato simple
+      if (_currentLocationString.isNotEmpty && !_currentLocationString.startsWith('Error')) {
+        mensaje += '\nUbicacion: https://www.google.com/maps/search/?api=1&query=$_currentLocationString';
+      }
+
+      // Enviar SMS a todos los contactos
       List<String> numeros = []; // List to hold phone numbers
 
       if (contactos.isNotEmpty) {
@@ -212,7 +264,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
       if (numeros.isNotEmpty) {
          // Send all SMS in parallel
          await Future.wait(
-           numeros.map((numero) => telephony.sendSms(to: numero, message: message))
+           numeros.map((numero) => telephony.sendSms(to: numero, message: mensaje))
          );
          debugPrint('Emergency SMS sent successfully.');
          if (mounted) {
@@ -356,9 +408,10 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.secondaryRed,
               ),
-              onPressed: () {
+              onPressed: () async {
                 alertSent = true; // Mark as sent to prevent auto-send
                 Navigator.pop(context);
+                await _captureCurrentLocation();
                 _sendEmergencySMS(); // Send SMS immediately
               },
               child: const Text('Enviar Ahora'),
