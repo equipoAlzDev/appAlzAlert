@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:alzalert/theme/app_theme.dart';
 
@@ -39,49 +38,11 @@ class _BluetoothConnectionScreenState extends State<BluetoothConnectionScreen> {
           _updateStatus("No se pudo encender Bluetooth", Colors.orange);
           return;
         }
-        await _checkPermissions();
-      } else {
-        await _checkPermissions();
       }
+      await _scanDevices();
     } catch (e) {
       _updateStatus("Error inicializando Bluetooth", Colors.red);
       debugPrint("Error initBluetooth: $e");
-    }
-  }
-
-  Future<void> _checkPermissions() async {
-    try {
-      if (await _requestPermissions()) {
-        await _scanDevices();
-      } else {
-        _updateStatus("Permisos denegados", Colors.orange);
-      }
-    } catch (e) {
-      _updateStatus("Error en permisos", Colors.red);
-      debugPrint("Error checkPermissions: $e");
-    }
-  }
-
-  Future<bool> _requestPermissions() async {
-    try {
-      if (await FlutterBluePlus.isSupported == false) {
-        _updateStatus("Bluetooth no soportado", Colors.orange);
-        return false;
-      }
-
-      var permissions =
-          await [
-            Permission.bluetoothScan,
-            Permission.bluetoothConnect,
-            Permission.locationWhenInUse,
-          ].request();
-
-      return permissions[Permission.bluetoothScan]?.isGranted == true &&
-          permissions[Permission.bluetoothConnect]?.isGranted == true &&
-          permissions[Permission.locationWhenInUse]?.isGranted == true;
-    } catch (e) {
-      debugPrint("Error requestPermissions: $e");
-      return false;
     }
   }
 
