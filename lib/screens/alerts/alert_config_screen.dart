@@ -103,8 +103,13 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Intervalo de Alerta Principal',
+                      'Tiempo para Alerta Principal',
                       style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Selecciona el tiempo antes de que se active la alerta principal:',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
                     // Dropdown to select primary interval
@@ -143,8 +148,13 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Intervalo de Alerta Secundaria',
+                      'Tiempo para Alerta Secundaria',
                       style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Selecciona el tiempo antes de que se active la alerta Secundaria:',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
                     // Dropdown to select secondary interval
@@ -180,7 +190,10 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
               onPressed: _saveSettings,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 15),
-                 backgroundColor: AppTheme.secondaryGreen, // Usa el color secundario verde de tu tema
+                backgroundColor: AppTheme.secondaryGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ), // Usa el color secundario verde de tu tema
               ),
               child: const Text(
                 'Guardar Configuración',
