@@ -32,17 +32,6 @@ void main() async{
     debugPrint("Permiso de ubicación en primer plano denegado: $locationStatus");
     // Considerar informar al usuario que la funcionalidad de ubicación no funcionará
   }
-
-  // Solicitar permiso de ubicación en segundo plano (opcional, pero necesario para alertas en background)
-  // Es mejor solicitarlo cuando la funcionalidad de fondo es explícitamente necesaria.
-  // Aquí lo añadimos según la declaración en AndroidManifest.xml
-  /* var backgroundLocationStatus = await Permission.locationBackground.request();
-  if (backgroundLocationStatus.isGranted) {
-   debugPrint("Permiso de ubicación en segundo plano concedido.");
-  } else {
-   debugPrint("Permiso de ubicación en segundo plano denegado: $backgroundLocationStatus");
-   // Considerar informar al usuario. La alerta en segundo plano podría no funcionar.
-  } */
   
   runApp(
     MultiProvider(

@@ -6,7 +6,6 @@ import 'package:alzalert/providers/alert_system_provider.dart';
 import 'package:alzalert/providers/user_provider.dart';
 import 'package:alzalert/screens/alerts/alert_config_screen.dart';
 import 'package:alzalert/screens/history/location_history_screen.dart';
-import 'package:alzalert/screens/notifications/notifications_screen.dart';
 import 'package:alzalert/screens/profile/profile_screen.dart';
 import 'package:alzalert/theme/app_theme.dart';
 import 'package:telephony/telephony.dart';
@@ -36,8 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const MainHomeScreen(),
     const LocationHistoryScreen(),
-    const AlertConfigScreen(), // Index 2 for AlertConfigScreen
-    const NotificationsScreen(),
+    const AlertConfigScreen(),
     const ProfileScreen(),
   ];
 
@@ -72,11 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
              activeIcon: Icon(Icons.settings),
              label: 'Config. Alertas',
            ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message_outlined),
-            activeIcon: Icon(Icons.message),
-            label: 'Notificaciones',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             activeIcon: Icon(Icons.person),
