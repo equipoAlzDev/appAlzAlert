@@ -200,12 +200,20 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                   ),
                 ),            
                 const SizedBox(height: 40),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _saveAndContinue,
-                    child: const Text('Continuar'),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _saveAndContinue,
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30), // Un valor alto para hacerlo muy redondeado como una cápsula
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Opcional: para darle mejor aspecto
+                      ),
+                      child: const Text('Continuar', style: TextStyle(fontSize: 17),),
+                    ),
                   ),
                 ),
               ],

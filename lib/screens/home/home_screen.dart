@@ -44,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color.fromARGB(255, 0, 128, 128),
+        iconSize: 25,
+        selectedFontSize: 15,
+        unselectedFontSize: 15,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
@@ -51,8 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primaryBlue,
-        unselectedItemColor: AppTheme.textLight,
+        selectedItemColor: const Color.fromARGB(255, 200, 255, 130), // Color contrastante para el elemento seleccionado
+        unselectedItemColor: Colors.white, // Color blanco para los elementos no seleccionados
+        elevation: 8,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
@@ -264,7 +269,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
            ScaffoldMessenger.of(context).showSnackBar(
              const SnackBar(
                content: Text('Alerta enviada a contactos de emergencia'),
-               backgroundColor: AppTheme.secondaryGreen,
+               backgroundColor: Color.fromARGB(255, 255, 165, 0),
              ),
            );
          }
@@ -423,15 +428,15 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('alzalert'),
+            title: const Text('AlzAlert'),
             actions: [
               Switch(
                 value: isAlertSystemActive,
                 // Corrected: Removed context argument from _toggleAlertSystem call
                 onChanged: (_) => _toggleAlertSystem(context), // Still need context for SnackBar
-                activeColor: AppTheme.secondaryGreen,
-                inactiveThumbColor: const Color.fromARGB(255, 200, 200, 200),
-                inactiveTrackColor: Colors.grey[500],
+                activeColor: const Color.fromARGB(255, 200, 255, 130),
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: const Color.fromARGB(255, 206, 206, 206),
               ),
             ],
           ),

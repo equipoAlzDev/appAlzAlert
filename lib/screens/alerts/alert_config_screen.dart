@@ -186,18 +186,23 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
             const SizedBox(height: 32),
 
             // Button to save all configurations
-            ElevatedButton(
-              onPressed: _saveSettings,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                backgroundColor: AppTheme.secondaryGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ), // Usa el color secundario verde de tu tema
-              ),
-              child: const Text(
-                'Guardar Configuración',
-                style: TextStyle(fontSize: 18),
+            Center(
+              child: Container(
+                width: 300, // Ancho específico en píxeles
+                child: ElevatedButton(
+                  onPressed: _saveSettings,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    backgroundColor: AppTheme.primaryBlue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Guardar Configuración',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
               ),
             ),
           ],

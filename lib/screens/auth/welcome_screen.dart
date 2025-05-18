@@ -23,7 +23,7 @@ class WelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Bienvenido a alzalert',
+                'Bienvenido a AlzAlert',
                 style: Theme.of(context).textTheme.displayMedium,
                 textAlign: TextAlign.center,
               ),
@@ -45,7 +45,7 @@ class WelcomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => const LoginScreen()),
                     );
                   },
-                  child: const Text('Iniciar Sesión'),
+                  child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 18),),
                 ),
               ),
               const SizedBox(height: 16),
@@ -65,7 +65,7 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Registrarse'),
+                  child: const Text('Registrarse', style: TextStyle(fontSize: 18),),
                 ),
               ),
             ],

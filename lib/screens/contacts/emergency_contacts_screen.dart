@@ -259,6 +259,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
               ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarFormulario(context, userId: userId),
+        backgroundColor: Color.fromARGB(255, 0, 128, 128),
         child: const Icon(Icons.add),
       ),
     );

@@ -8,8 +8,7 @@ class LocationHistoryScreen extends StatefulWidget {
   State<LocationHistoryScreen> createState() => _LocationHistoryScreenState();
 }
 
-class _LocationHistoryScreenState extends State<LocationHistoryScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _LocationHistoryScreenState extends State<LocationHistoryScreen> {
   String _selectedFilter = 'Hoy';
 
   final List<Map<String, dynamic>> _locationHistory = [
@@ -39,18 +38,6 @@ class _LocationHistoryScreenState extends State<LocationHistoryScreen> with Sing
     },
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
   List<Map<String, dynamic>> _getFilteredLocations() {
     if (_selectedFilter == 'Todos') {
       return _locationHistory;
@@ -68,13 +55,6 @@ class _LocationHistoryScreenState extends State<LocationHistoryScreen> with Sing
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historial de Ubicaciones'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Mapa'),
-            Tab(text: 'Lista'),
-          ],
-        ),
       ),
       body: Column(
         children: [
@@ -110,89 +90,57 @@ class _LocationHistoryScreenState extends State<LocationHistoryScreen> with Sing
             ),
           ),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Pestaña de Mapa
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.map,
-                        size: 100,
-                        color: AppTheme.textLight,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Mapa de ubicaciones',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Aquí se mostrará el mapa con las ubicaciones registradas',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Pestaña de Lista
-                filteredLocations.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.location_off,
-                              size: 80,
-                              color: AppTheme.textLight,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No hay ubicaciones registradas',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ],
+            child: filteredLocations.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_off,
+                          size: 80,
+                          color: AppTheme.textLight,
                         ),
-                      )
-                    : ListView.builder(
-                        itemCount: filteredLocations.length,
-                        itemBuilder: (context, index) {
-                          final location = filteredLocations[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                        const SizedBox(height: 16),
+                        Text(
+                          'No hay ubicaciones registradas',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: filteredLocations.length,
+                    itemBuilder: (context, index) {
+                      final location = filteredLocations[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: AppTheme.primaryBlue,
+                            child: const Icon(
+                              Icons.location_on,
+                              color: AppTheme.primaryWhite,
                             ),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: AppTheme.primaryBlue,
-                                child: const Icon(
-                                  Icons.location_on,
-                                  color: AppTheme.primaryWhite,
-                                ),
-                              ),
-                              title: Text(location['address']),
-                              subtitle: Text(
-                                  '${location['date']} - ${location['time']}'),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.map),
-                                onPressed: () {
-                                  // Abrir ubicación en mapa
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ],
-            ),
+                          ),
+                          title: Text(location['address']),
+                          subtitle: Text(
+                              '${location['date']} - ${location['time']}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.map),
+                            onPressed: () {
+                              // Abrir ubicación en mapa
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
 }
-

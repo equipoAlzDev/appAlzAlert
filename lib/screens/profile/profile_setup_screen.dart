@@ -146,7 +146,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 24),
-                          Center(
+                          /* Center(
                             child: Stack(
                               children: [
                                 CircleAvatar(
@@ -180,7 +180,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                 ),
                               ],
                             ),
-                          ),
+                          ), */
                           const SizedBox(height: 32),
                           TextFormField(
                             controller: _nameController,
@@ -227,21 +227,29 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             },
                           ),
                           const SizedBox(height: 40),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton(
-                              onPressed: userProvider.isLoading ? null : _saveAndContinue,
-                              child: userProvider.isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppTheme.primaryWhite,
-                                      ),
-                                    )
-                                  : const Text('Continuar'),
+                          Center(
+                            child: SizedBox(
+                              width: 300,
+                              height: 56,
+                              child: ElevatedButton(
+                                onPressed: userProvider.isLoading ? null : _saveAndContinue,
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30), // Un valor alto para hacerlo muy redondeado como una cápsula
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Opcional: para darle mejor aspecto
+                                ),
+                                child: userProvider.isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppTheme.primaryWhite,
+                                        ),
+                                      )
+                                    : const Text('Continuar', style: TextStyle(fontSize: 17),),
+                              ),
                             ),
                           ),
                           if (userProvider.error != null)

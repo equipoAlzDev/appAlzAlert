@@ -152,9 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 150),
                 Text(
                   'Bienvenido de nuevo',
                   style: Theme.of(context).textTheme.displayMedium,
@@ -239,18 +239,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 
-                const SizedBox(height: 16),
+                const SizedBox(height: 30),
                 SizedBox(
-                  width: double.infinity,
+                  width: 300,
                   height: 56,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30), // Un valor alto para hacerlo muy redondeado como una cápsula
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Opcional: para darle mejor aspecto
+                    ),
                     child: _isLoading 
                       ? const CircularProgressIndicator()
-                      : const Text('Iniciar Sesión'),
+                      : const Text('Iniciar Sesión', style: TextStyle(fontSize: 17),),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 Center(
                   child: TextButton(
                     onPressed: _isLoading ? null : _resetPassword,
