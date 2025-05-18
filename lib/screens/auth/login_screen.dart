@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:alzalert/screens/home/home_screen.dart';
-import 'package:alzalert/theme/app_theme.dart';
 
 import '../../providers/user_provider.dart';
 
@@ -37,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _emailErrorMessage = null;
       _passwordErrorMessage = null;
     });
-    
+
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -66,7 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           switch (e.code) {
             case 'user-not-found':
-              _emailErrorMessage = 'No existe una cuenta con este correo electrónico.';
+              _emailErrorMessage =
+                  'No existe una cuenta con este correo electrónico.';
               break;
             case 'wrong-password':
               _passwordErrorMessage = 'Contraseña incorrecta.';
@@ -81,7 +81,8 @@ class _LoginScreenState extends State<LoginScreen> {
               _emailErrorMessage = 'Esta cuenta ha sido deshabilitada.';
               break;
             case 'too-many-requests':
-              _passwordErrorMessage = 'Demasiados intentos fallidos. Intenta más tarde.';
+              _passwordErrorMessage =
+                  'Demasiados intentos fallidos. Intenta más tarde.';
               break;
             default:
               // Para otros errores, mostrar en el campo de correo como ubicación predeterminada
@@ -122,7 +123,11 @@ class _LoginScreenState extends State<LoginScreen> {
       await _auth.sendPasswordResetEmail(email: email);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Se ha enviado un correo para restablecer tu contraseña')),
+          const SnackBar(
+            content: Text(
+              'Se ha enviado un correo para restablecer tu contraseña',
+            ),
+          ),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -143,9 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Iniciar Sesión'),
-      ),
+      appBar: AppBar(title: const Text('Iniciar Sesión')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -165,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Campo de correo electrónico
                 TextFormField(
                   controller: _emailController,
@@ -178,28 +181,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Por favor ingresa tu correo electrónico';
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
                       return 'Ingresa un correo electrónico válido';
                     }
                     return null;
                   },
                 ),
-                
+
                 // Mensaje de error para el email
                 if (_emailErrorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       _emailErrorMessage!,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 10,
-                      ),
+                      style: TextStyle(color: Colors.red, fontSize: 10),
                     ),
                   ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Campo de contraseña
                 TextFormField(
                   controller: _passwordController,
@@ -209,7 +211,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -225,17 +229,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                
+
                 // Mensaje de error para la contraseña
                 if (_passwordErrorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       _passwordErrorMessage!,
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 10,
-                      ),
+                      style: TextStyle(color: Colors.red, fontSize: 10),
                     ),
                   ),
                 

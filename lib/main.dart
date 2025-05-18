@@ -15,26 +15,44 @@ import 'package:geocoding/geocoding.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Solicitar permiso de ubicación en primer plano
   var locationStatus = await Permission.location.request();
   if (locationStatus.isGranted) {
-  debugPrint("Permiso de ubicación en primer plano concedido.");
+    debugPrint("Permiso de ubicación en primer plano concedido.");
   } else {
-    debugPrint("Permiso de ubicación en primer plano denegado: $locationStatus");
+    debugPrint(
+      "Permiso de ubicación en primer plano denegado: $locationStatus",
+    );
     // Considerar informar al usuario que la funcionalidad de ubicación no funcionará
   }
   
+  var permissions =
+      await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.locationWhenInUse,
+      ].request();
+
+  // Solicitar permiso de ubicación en segundo plano (opcional, pero necesario para alertas en background)
+  // Es mejor solicitarlo cuando la funcionalidad de fondo es explícitamente necesaria.
+  // Aquí lo añadimos según la declaración en AndroidManifest.xml
+  /* var backgroundLocationStatus = await Permission.locationBackground.request();
+  if (backgroundLocationStatus.isGranted) {
+   debugPrint("Permiso de ubicación en segundo plano concedido.");
+  } else {
+   debugPrint("Permiso de ubicación en segundo plano denegado: $backgroundLocationStatus");
+   // Considerar informar al usuario. La alerta en segundo plano podría no funcionar.
+  } */
+
   runApp(
     MultiProvider(
       providers: [
@@ -72,4 +90,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
