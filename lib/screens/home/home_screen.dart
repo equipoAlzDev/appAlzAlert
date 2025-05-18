@@ -9,7 +9,7 @@ import 'package:alzalert/screens/history/location_history_screen.dart';
 import 'package:alzalert/screens/profile/profile_screen.dart';
 import 'package:alzalert/theme/app_theme.dart';
 import 'package:telephony/telephony.dart';
-
+import 'package:alzalert/providers/location_history_provider.dart';
 import '../../providers/contacto_emergencia_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -100,6 +100,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   final String _emergencyNumber = "3157042961";
   // Variable para almacenar la ubicación capturada
  String _currentLocationString = '';
+ double? _currentLatitude; // Guardar latitud y longitud por separado para el proveedor
+  double? _currentLongitude;
 
  // Getter para la ubicación capturada (aunque solo se usará internamente para imprimir)
  String get currentLocationString => _currentLocationString;
@@ -182,12 +184,16 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
 
+    _currentLatitude = position.latitude;
+    _currentLongitude = position.longitude;
     // Formatear y almacenar la ubicación
     _currentLocationString = '${position.latitude},${position.longitude}';
     debugPrint('Ubicación capturada: $_currentLocationString'); // Imprimir en consola
     } catch (e) {
-    debugPrint('Error al capturar la ubicación: $e');
-    _currentLocationString = 'Error al capturar ubicación: ${e.toString()}';
+      debugPrint('Error al capturar la ubicación: $e');
+      _currentLocationString = 'Error al capturar ubicación: ${e.toString()}';
+      _currentLatitude = null;
+      _currentLongitude = null;
     }
     // No es necesario llamar notifyListeners aquí, ya que la UI no mostrará esta variable directamente
     // La ubicación se captura cuando se activa el diálogo.
@@ -232,6 +238,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
              );
           }
           return;
+      }
+
+      if (_currentLatitude != null && _currentLongitude != null) {
+        await Provider.of<LocationHistoryProvider>(context, listen: false)
+            .addLocationEntry(userId, _currentLatitude!, _currentLongitude!);
+      } else {
+        debugPrint('No se pudo guardar la ubicación en Firestore: coordenadas no disponibles.');
       }
 
       // Obtener contactos de emergencia

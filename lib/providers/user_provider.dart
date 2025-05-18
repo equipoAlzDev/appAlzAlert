@@ -1,7 +1,12 @@
+import 'package:alzalert/main.dart';
+import 'package:alzalert/providers/alert_system_provider.dart';
+import 'package:alzalert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/location_history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:alzalert/models/user_model.dart';
+import 'package:provider/provider.dart';
 
 class UserProvider extends ChangeNotifier {
   UserModel _user = UserModel.empty();
@@ -39,11 +44,25 @@ class UserProvider extends ChangeNotifier {
           address: '',
         );
       }
+
     } catch (e) {
       _error = 'Error al cargar los datos del usuario: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  // Método para obtener el LocationHistoryProvider
+  LocationHistoryProvider? _getLocationHistoryProvider() {
+    try {
+      // Intentar obtener el provider desde el árbol de widgets
+      return navigatorKey.currentContext != null
+          ? Provider.of<LocationHistoryProvider>(navigatorKey.currentContext!, listen: false)
+          : null;
+    } catch (e) {
+      debugPrint('Error al obtener LocationHistoryProvider: $e');
+      return null;
     }
   }
 
@@ -100,6 +119,28 @@ class UserProvider extends ChangeNotifier {
   // Método para limpiar los datos cuando el usuario cierra sesión
   void clearUser() {
     _user = UserModel.empty();
+    // Limpiar datos en otros providers
+    if (navigatorKey.currentContext != null) {
+      // Limpiar datos de alertas
+      final alertProvider = Provider.of<AlertSystemProvider>(
+        navigatorKey.currentContext!, 
+        listen: false
+      );
+      
+      // Limpiar historial de ubicaciones
+      final locationProvider = Provider.of<LocationHistoryProvider>(
+        navigatorKey.currentContext!, 
+        listen: false
+      );
+      
+      // Limpiar contactos de emergencia
+      final contactosProvider = Provider.of<ContactoEmergenciaProvider>(
+        navigatorKey.currentContext!, 
+        listen: false
+      );
+      contactosProvider.resetContactos();
+    }
     notifyListeners();
   }
+
 }

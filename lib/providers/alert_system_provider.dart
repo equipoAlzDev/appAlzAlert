@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as Math;
 import 'package:alzalert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/location_history_provider.dart';
 import 'package:alzalert/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +27,9 @@ class AlertSystemProvider with ChangeNotifier {
  int _retryCount = 0; // Retry counter
 
  // Variable para almacenar la ubicación capturada
- String _currentLocationString = '';
+  String _currentLocationString = '';
+  double? _currentLatitude; // Guardar latitud y longitud por separado para el proveedor
+  double? _currentLongitude;
 
  // Constructor - accepts the navigatorKey
  AlertSystemProvider(this._navigatorKey) {
@@ -156,12 +159,17 @@ class AlertSystemProvider with ChangeNotifier {
    Position position = await Geolocator.getCurrentPosition(
     desiredAccuracy: LocationAccuracy.high);
 
+    _currentLatitude = position.latitude;
+    _currentLongitude = position.longitude;
+
    // Formatear y almacenar la ubicación
    _currentLocationString = '${position.latitude},${position.longitude}';
    debugPrint('Ubicación capturada: $_currentLocationString'); // Imprimir en consola
   } catch (e) {
-   debugPrint('Error al capturar la ubicación: $e');
-   _currentLocationString = 'Error al capturar ubicación: ${e.toString()}';
+    debugPrint('Error al capturar la ubicación: $e');
+    _currentLocationString = 'Error al capturar ubicación: ${e.toString()}';
+    _currentLatitude = null;
+    _currentLongitude = null;
   }
   // No es necesario llamar notifyListeners aquí, ya que la UI no mostrará esta variable directamente
   // La ubicación se captura cuando se activa el diálogo.
@@ -232,111 +240,7 @@ class AlertSystemProvider with ChangeNotifier {
    }
   }
 
-  // Handle the final timeout event or manual 'No' response
-  /* void _handleFinalTimeout() {
-   debugPrint('Handling final emergency. Attempting to send SMS.');
-
-   // Use the context from the internally stored _navigatorKey to access providers
-   final context = _navigatorKey.currentContext;
-   if (context == null) {
-    debugPrint('Error: Context from _navigatorKey.currentContext is null. Cannot send final SMS.');
-    // Consider logging this error or showing a persistent notification.
-    _retryCount = 0; // Reset retry count even on error
-    _startPrimaryTimer(); // Restart primary timer
-    return;
-   }
-
-   try {
-    // Access providers using the context from _navigatorKey
-    // Use listen: false as we are only reading data and calling methods
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.id ?? '';
-
-    if (userId.isEmpty) {
-     debugPrint('Error: Usuario no identificado para enviar SMS final.');
-     // Consider logging this error or showing a persistent notification.
-     return;
-    }
-
-    final contactosProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
-    // Filter contacts for the current user
-    final contactos = contactosProvider.contactos.where((c) => c.userId == userId).toList();
-
-    // Create the emergency message
-    // You might want to include _currentLocationString in the message here
-    var message = '¡EMERGENCIA! ${userProvider.user?.name ?? 'Usuario'} ha referido no estar bien'; /* puede que necesite ayuda. */
-        // Example: Add location to message (optional, outside current request scope but useful)
-        // if (_currentLocationString.isNotEmpty && !_currentLocationString.startsWith('Error')) {
-        //   message += '\nUbicación: _currentLocationString';
-        // }
-
-
-    List<String> numeros = []; // List to hold phone numbers
-
-    if (contactos.isNotEmpty) {
-     // Add all contact numbers
-     numeros = contactos.map((c) => c.phone).toList();
-    }
-
-    // Instantiate Telephony - requires platform channel interaction
-    final Telephony telephony = Telephony.instance;
-
-    // Check and request permissions (asynchronous)
-    // Doing this here is problematic. Permissions should be requested upfront.
-    // Assuming permissions are already granted for this simplified example.
-    // A production app needs robust permission handling before attempting to send SMS.
-
-    // ONLY SEND SMS IF THERE ARE NUMBERS
-    if (numeros.isNotEmpty) {
-     debugPrint('Attempting to send final emergency SMS to: ${numeros.join(', ')}');
-     // Send all SMS in parallel
-     Future.wait(
-      numeros.map((numero) => telephony.sendSms(to: numero, message: message))
-     ).then((_) {
-       debugPrint('Final emergency SMS sent successfully.');
-       // Consider showing a local notification to the user.
-       // Show a SnackBar confirming SMS sent
-       if (_navigatorKey.currentContext != null) {
-         ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-          const SnackBar(content: Text('Alertas de emergencia enviadas')),
-         );
-       }
-     }).catchError((e) {
-       debugPrint('Error sending final emergency SMS: $e');
-       // Consider logging the error or showing a persistent notification.
-       // Show a SnackBar indicating error
-       if (_navigatorKey.currentContext != null) {
-         ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-          SnackBar(content: Text('Error al enviar alertas: ${e.toString()}')),
-         );
-       }
-     });
-    } else {
-     debugPrint('No phone numbers configured or found to send final emergency SMS. SMS not sent.');
-     // Optionally show a message to the user
-      if (_navigatorKey.currentContext != null) {
-       ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-         const SnackBar(content: Text('No hay contactos de emergencia configurados. No se envió la alerta.')),
-       );
-      }
-    }
-
-   } catch (e) {
-    debugPrint('Exception in _handleFinalTimeout: $e');
-    // Handle any exceptions during provider access or SMS setup
-    if (_navigatorKey.currentContext != null) {
-      ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
-       SnackBar(content: Text('Error interno al preparar alerta: ${e.toString()}')),
-      );
-    }
-   } finally {
-    // Always reset retry count and restart the primary timer after handling the final timeout
-    _retryCount = 0;
-    _startPrimaryTimer();
-   }
-  } */
-
- void _handleFinalTimeout() {
+ Future<void> _handleFinalTimeout() async {
   debugPrint('Handling final emergency. Attempting to send SMS.');
 
   // Use the context from the internally stored _navigatorKey to access providers
@@ -357,6 +261,13 @@ class AlertSystemProvider with ChangeNotifier {
       debugPrint('Error: Usuario no identificado para enviar SMS final.');
       return;
     }
+
+    if (_currentLatitude != null && _currentLongitude != null) {
+        await Provider.of<LocationHistoryProvider>(context, listen: false)
+            .addLocationEntry(userId, _currentLatitude!, _currentLongitude!);
+      } else {
+        debugPrint('No se pudo guardar la ubicación en Firestore: coordenadas no disponibles.');
+      }
 
     final contactosProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
     // Filter contacts for the current user
@@ -431,7 +342,6 @@ class AlertSystemProvider with ChangeNotifier {
     _startPrimaryTimer();
   }
 }
-
 
  // Dispose method to cancel timers when the provider is no longer needed
  @override

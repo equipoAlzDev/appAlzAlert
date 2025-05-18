@@ -7,6 +7,7 @@ import 'package:telephony/telephony.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:alzalert/providers/contacto_emergencia_provider.dart';
 
+
 // Remove the global declaration of navigatorKey here.
 // It's no longer needed in this file.
 // late GlobalKey<NavigatorState> navigatorKey; // REMOVE THIS LINE

@@ -1,5 +1,11 @@
+// lib/screens/history/location_history_screen.dart
+import 'package:alzalert/models/location_entry.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:alzalert/theme/app_theme.dart';
+import 'package:alzalert/providers/location_history_provider.dart'; // Importa el proveedor
+import 'package:alzalert/providers/user_provider.dart'; // Importa el proveedor de usuario
+import 'package:intl/intl.dart'; // Para formatear fechas, añade a pubspec.yaml si no lo tienes
 
 class LocationHistoryScreen extends StatefulWidget {
   const LocationHistoryScreen({super.key});
@@ -9,137 +15,184 @@ class LocationHistoryScreen extends StatefulWidget {
 }
 
 class _LocationHistoryScreenState extends State<LocationHistoryScreen> {
-  String _selectedFilter = 'Hoy';
+  String _selectedFilter = 'Todos'; // Valor inicial para ver todo
 
-  final List<Map<String, dynamic>> _locationHistory = [
-    {
-      'address': 'Av. Insurgentes Sur 1602, Ciudad de México',
-      'time': '10:30 AM',
-      'date': 'Hoy',
-      'coordinates': {'lat': 19.3833, 'lng': -99.1833},
-    },
-    {
-      'address': 'Paseo de la Reforma 222, Ciudad de México',
-      'time': '2:45 PM',
-      'date': 'Ayer',
-      'coordinates': {'lat': 19.4333, 'lng': -99.1333},
-    },
-    {
-      'address': 'Calle Madero 1, Centro Histórico, Ciudad de México',
-      'time': '5:15 PM',
-      'date': 'Ayer',
-      'coordinates': {'lat': 19.4333, 'lng': -99.1333},
-    },
-    {
-      'address': 'Av. Universidad 3000, Ciudad de México',
-      'time': '11:20 AM',
-      'date': '12/04/2023',
-      'coordinates': {'lat': 19.3333, 'lng': -99.2333},
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Carga el historial de ubicaciones del usuario actual al iniciar la pantalla
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = Provider.of<UserProvider>(context, listen: false).user?.id ?? '';
+      if (userId.isNotEmpty) {
+        Provider.of<LocationHistoryProvider>(context, listen: false).fetchLocationHistory(userId);
+      }
+    });
+  }
 
-  List<Map<String, dynamic>> _getFilteredLocations() {
+  List<Map<String, dynamic>> _getFilteredLocations(List<LocationEntry> allLocations) {
     if (_selectedFilter == 'Todos') {
-      return _locationHistory;
+      return allLocations.map((entry) => {
+        'address': entry.address,
+        'time': DateFormat('hh:mm a').format(entry.timestamp),
+        'date': DateFormat('dd/MM/yyyy').format(entry.timestamp), // Formato para el filtro
+        'coordinates': {'lat': entry.latitude, 'lng': entry.longitude},
+      }).toList();
     } else {
-      return _locationHistory
-          .where((location) => location['date'] == _selectedFilter)
+      // Filtra por la fecha seleccionada
+      return allLocations
+          .where((entry) => DateFormat('dd/MM/yyyy').format(entry.timestamp) == _selectedFilter)
+          .map((entry) => {
+            'address': entry.address,
+            'time': DateFormat('hh:mm a').format(entry.timestamp),
+            'date': DateFormat('dd/MM/yyyy').format(entry.timestamp),
+            'coordinates': {'lat': entry.latitude, 'lng': entry.longitude},
+          })
           .toList();
     }
   }
 
+  // Método para obtener las fechas únicas para el Dropdown
+  List<String> _getUniqueDates(List<LocationEntry> allLocations) {
+    final List<String> dates = ['Todos'];
+    final Set<String> uniqueDates = {};
+    for (var entry in allLocations) {
+      uniqueDates.add(DateFormat('dd/MM/yyyy').format(entry.timestamp));
+    }
+    dates.addAll(uniqueDates.toList()..sort((a, b) { // Ordenar las fechas de forma descendente
+      try {
+        DateTime dateA = DateFormat('dd/MM/yyyy').parse(a);
+        DateTime dateB = DateFormat('dd/MM/yyyy').parse(b);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0; // En caso de error, no reordenar
+      }
+    }));
+    return dates;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredLocations = _getFilteredLocations();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Historial de Ubicaciones'),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                const Text('Filtrar por: '),
-                const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: _selectedFilter,
-                  items: const [
-                    DropdownMenuItem(value: 'Todos', child: Text('Todos')),
-                    DropdownMenuItem(value: 'Hoy', child: Text('Hoy')),
-                    DropdownMenuItem(value: 'Ayer', child: Text('Ayer')),
-                    DropdownMenuItem(value: '12/04/2023', child: Text('12/04/2023')),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedFilter = value!;
-                    });
-                  },
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () {
-                    // Implementar exportación de historial
-                  },
-                  icon: const Icon(Icons.download),
-                  label: const Text('Exportar'),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: filteredLocations.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.location_off,
-                          size: 80,
-                          color: AppTheme.textLight,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No hay ubicaciones registradas',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
+      body: Consumer<LocationHistoryProvider>(
+        builder: (context, locationHistoryProvider, child) {
+          if (locationHistoryProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final allLocations = locationHistoryProvider.locationHistory;
+          final filteredLocations = _getFilteredLocations(allLocations);
+          final uniqueDates = _getUniqueDates(allLocations);
+
+          // Ajusta el valor del filtro si el filtro actual ya no existe en las fechas disponibles
+          if (!uniqueDates.contains(_selectedFilter) && _selectedFilter != 'Todos') {
+            _selectedFilter = 'Todos';
+          }
+          if (uniqueDates.length == 1 && uniqueDates.first != 'Todos') {
+            _selectedFilter = uniqueDates.first;
+          }
+
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const Text('Filtrar por: '),
+                    const SizedBox(width: 8),
+                    DropdownButton<String>(
+                      value: _selectedFilter,
+                      items: uniqueDates.map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedFilter = value!;
+                        });
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: filteredLocations.length,
-                    itemBuilder: (context, index) {
-                      final location = filteredLocations[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: AppTheme.primaryBlue,
-                            child: const Icon(
-                              Icons.location_on,
-                              color: AppTheme.primaryWhite,
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: () {
+                        // TODO: Implementar exportación de historial
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Funcionalidad de exportar no implementada aún.')),
+                        );
+                      },
+                      icon: const Icon(Icons.download),
+                      label: const Text('Exportar'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: filteredLocations.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.location_off,
+                              size: 80,
+                              color: AppTheme.textLight,
                             ),
-                          ),
-                          title: Text(location['address']),
-                          subtitle: Text(
-                              '${location['date']} - ${location['time']}'),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.map),
-                            onPressed: () {
-                              // Abrir ubicación en mapa
-                            },
-                          ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay ubicaciones registradas para el filtro seleccionado',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                      )
+                    : ListView.builder(
+                        itemCount: filteredLocations.length,
+                        itemBuilder: (context, index) {
+                          final location = filteredLocations[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                radius: 25, // Un poco más grande para mejor visibilidad
+                                backgroundColor: AppTheme.primaryBlue,
+                                child: const Icon(
+                                  Icons.location_on,
+                                  color: AppTheme.primaryWhite,
+                                  size: 28, // Tamaño del icono
+                                ),
+                              ),
+                              title: Text(location['address']),
+                              subtitle: Text(
+                                  '${location['date']} - ${location['time']}'),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.map),
+                                onPressed: () {
+                                  // TODO: Abrir ubicación en mapa
+                                  final lat = location['coordinates']['lat'];
+                                  final lng = location['coordinates']['lng'];
+                                  debugPrint('Abrir mapa para: $lat, $lng');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Funcionalidad de abrir mapa no implementada aún.')),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

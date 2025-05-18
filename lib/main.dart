@@ -10,6 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'providers/user_provider.dart';
+import 'providers/location_history_provider.dart';
+import 'package:geocoding/geocoding.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -39,6 +41,7 @@ void main() async{
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
         ChangeNotifierProvider(create: (_) => AlertSystemProvider(navigatorKey)),
+        ChangeNotifierProvider(create: (_) => LocationHistoryProvider()),
       ],
       child: const MyApp(),
     ),
