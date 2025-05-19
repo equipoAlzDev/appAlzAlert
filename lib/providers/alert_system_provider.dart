@@ -52,6 +52,21 @@ class AlertSystemProvider with ChangeNotifier {
  String get currentLocationString => _currentLocationString;
 
 
+  // Setter para activar/desactivar el sistema
+  set isAlertSystemActive(bool value) {
+    if (_isAlertSystemActive != value) {
+      _isAlertSystemActive = value;
+      if (_isAlertSystemActive) {
+        // Si se activa el sistema, iniciamos los temporizadores
+        _startPrimaryTimer();
+      } else {
+        // Si se desactiva el sistema, cancelamos los temporizadores
+        _cancelAllTimers();
+      }
+      notifyListeners();
+    }
+  }
+
  // Setter for primary interval
  void setPrimaryInterval(int seconds) {
   _configuredPrimaryIntervalSeconds = seconds;
@@ -90,23 +105,31 @@ class AlertSystemProvider with ChangeNotifier {
  // Start the primary alert timer using the configured interval
  void _startPrimaryTimer() {
   _cancelAllTimers(); // Cancel any existing timers
+  if (!_isAlertSystemActive) return;
+
   _isSecondaryTimer = false; // Indicate it's the primary timer
-  _alertTimer = Timer(
-   Duration(seconds: _configuredPrimaryIntervalSeconds), // Use configured primary interval
-   () async => await _showAlertDialog(), // Call async method when timer finishes
-  );
-  debugPrint('Primary timer started for $_configuredPrimaryIntervalSeconds seconds');
+  _alertTimer = Timer.periodic(
+     Duration(seconds: _configuredPrimaryIntervalSeconds),
+     (timer) {
+       _showAlertDialog();
+     },
+   );
+   debugPrint('Primary timer started: $_configuredPrimaryIntervalSeconds seconds');
  }
 
  // Start the secondary alert timer using the configured interval
  void _startSecondaryTimer() {
   _cancelAllTimers(); // Cancel any existing timers
-  _isSecondaryTimer = true; // Indicate it's the secondary timer
-  _secondaryAlertTimer = Timer(
-   Duration(seconds: _configuredSecondaryIntervalSeconds), // Use configured secondary interval
-   () async => await _showAlertDialog(), // Call async method when timer finishes
-  );
-  debugPrint('Secondary timer started for $_configuredSecondaryIntervalSeconds seconds');
+  if (!_isAlertSystemActive) return;
+   
+   _isSecondaryTimer = true;
+   _secondaryAlertTimer = Timer.periodic(
+     Duration(seconds: _configuredSecondaryIntervalSeconds),
+     (timer) {
+       _showAlertDialog();
+     },
+   );
+   debugPrint('Secondary timer started: $_configuredSecondaryIntervalSeconds seconds');
  }
 
  // Reset the current timer (used when user responds 'Yes')
@@ -182,8 +205,16 @@ class AlertSystemProvider with ChangeNotifier {
    // --- Capturar ubicación antes de mostrar el diálogo ---
    debugPrint('Timer expired. Attempting to capture location before showing dialog.');
    await _captureCurrentLocation();
-   // --- Fin Captura de ubicación ---
 
+  // Si el sistema está desactivado, no mostrar el diálogo
+   if (!_isAlertSystemActive) {
+     debugPrint('Sistema de alertas desactivado. No se mostrará el diálogo.');
+     return;
+   }
+   
+   // --- Capturar ubicación antes de mostrar el diálogo ---
+   debugPrint('Timer expired. Attempting to capture location before showing dialog.');
+   await _captureCurrentLocation();
 
    // Prevent showing multiple dialogs
    // IMPORTANT: Check if _navigatorKey.currentState is not null before using it
@@ -253,6 +284,12 @@ class AlertSystemProvider with ChangeNotifier {
   }
 
   try {
+
+    if (!_isAlertSystemActive) {
+      debugPrint('Sistema de alertas desactivado. No se enviará SMS.');
+      return;
+    }
+
     // Access providers using the context from _navigatorKey
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final userId = userProvider.user?.id ?? '';

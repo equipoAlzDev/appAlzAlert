@@ -193,25 +193,30 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BluetoothConnectionScreen(),
+            Center(
+              child: Container(
+                width: 300, // Ancho específico en píxeles
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BluetoothConnectionScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    backgroundColor: const Color.fromARGB(255, 231, 112, 68),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                backgroundColor: const Color.fromARGB(255, 231, 112, 68),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  child: const Text(
+                    'Validar conexión a Bluetooth',
+                    style: TextStyle(fontSize: 18),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Validar conexión a Bluetooth',
-                style: TextStyle(fontSize: 18),
               ),
             ),
           ],
