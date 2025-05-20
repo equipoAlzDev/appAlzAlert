@@ -98,6 +98,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+
+        // Establecer el contexto de navegación para registro
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.setNavigationContext(NavigationContext.registration);
         
         if (mounted) {
           Navigator.push(

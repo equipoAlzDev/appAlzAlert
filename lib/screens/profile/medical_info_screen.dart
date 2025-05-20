@@ -1,6 +1,9 @@
+import 'package:alzalert/providers/user_provider.dart';
+import 'package:alzalert/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:alzalert/screens/contacts/emergency_contacts_screen.dart';
 import 'package:alzalert/theme/app_theme.dart';
+import 'package:provider/provider.dart';
 
 class MedicalInfoScreen extends StatefulWidget {
   const MedicalInfoScreen({super.key});
@@ -16,6 +19,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
   final _allergiesController = TextEditingController();
   final _doctorNameController = TextEditingController();
   final _doctorPhoneController = TextEditingController();
+   bool _isLoading = false;
 
   List<Map<String, dynamic>> _medications = [];
 
@@ -90,13 +94,49 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
     );
   }
 
-  void _saveAndContinue() {
+  void _saveAndContinue() async {
     if (_formKey.currentState!.validate()) {
-      // Guardar datos médicos
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const EmergencyContactsScreen()),
-      );
+      setState(() {
+        _isLoading = true;
+      });
+      
+      try {
+        // Aquí guardamos los datos médicos en Firebase
+        // Por implementar: guardar _medications, alergias, etc.
+        
+        // Verificamos el contexto de navegación
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        
+        if (userProvider.navigationContext == NavigationContext.registration) {
+          // Durante el registro, vamos a la siguiente pantalla
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EmergencyContactsScreen()),
+            );
+          }
+        } else {
+          // Si está editando, regresamos al perfil
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              (route) => false,
+            );
+          }
+        }
+      } catch (e) {
+        // Mostrar error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar los datos: $e')),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
   }
 

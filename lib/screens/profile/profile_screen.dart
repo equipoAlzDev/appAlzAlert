@@ -130,6 +130,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: Icons.person_outline,
                     title: 'Editar datos personales',
                     onTap: () {
+                      // Establecer el contexto de navegación antes de navegar
+                      final userProvider = Provider.of<UserProvider>(context, listen: false);
+                      userProvider.setNavigationContext(NavigationContext.editing);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const ProfileSetupScreen()),
@@ -140,6 +144,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: Icons.medical_information_outlined,
                     title: 'Información médica',
                     onTap: () {
+                      // Establecer el contexto de navegación antes de navegar
+                      final userProvider = Provider.of<UserProvider>(context, listen: false);
+                      userProvider.setNavigationContext(NavigationContext.editing);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const MedicalInfoScreen()),
@@ -150,6 +158,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: Icons.contact_phone_outlined,
                     title: 'Contactos de emergencia',
                     onTap: () {
+                      // Establecer el contexto de navegación antes de navegar
+                      final userProvider = Provider.of<UserProvider>(context, listen: false);
+                      userProvider.setNavigationContext(NavigationContext.editing);
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const EmergencyContactsScreen()),
