@@ -216,9 +216,15 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     // Verificar si hay al menos un contacto
     if (contactos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Debe agregar al menos un contacto de emergencia'),
+        SnackBar(
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(left: 15, right: 15, bottom: 25),
+          content: Container(
+            height: 50,
+            alignment: Alignment.center,
+            child: Text('Debes agregar al menos un contacto de emergencia'),
+          ),
         ),
       );
       return;
@@ -229,7 +235,6 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     });
     
     try {
-      // Aquí puedes guardar la información adicional si es necesario
       
       // Verificamos el contexto de navegación para determinar a dónde ir
       if (userProvider.navigationContext == NavigationContext.registration) {
@@ -244,11 +249,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
       } else {
         // Si estamos editando, regresamos al perfil
         if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            (route) => false,
-          );
+          Navigator.pop(context);
         }
       }
     } catch (e) {

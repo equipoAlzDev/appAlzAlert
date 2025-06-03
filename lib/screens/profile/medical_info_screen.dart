@@ -118,11 +118,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
         } else {
           // Si está editando, regresamos al perfil
           if (mounted) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              (route) => false,
-            );
+            Navigator.pop(context);
           }
         }
       } catch (e) {

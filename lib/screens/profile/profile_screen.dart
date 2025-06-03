@@ -16,6 +16,10 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+  int _selectedIndex = 0;
+  
+
   void _signOut() {
     showDialog(
       context: context,

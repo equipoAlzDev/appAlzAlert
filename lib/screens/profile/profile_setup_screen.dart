@@ -84,11 +84,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             );
           } else {
             // Si estamos editando, regresamos al perfil
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              (route) => false,
-            );
+            if (mounted) {
+              Navigator.pop(context);
+            }
           }
         }
       } catch (e) {
