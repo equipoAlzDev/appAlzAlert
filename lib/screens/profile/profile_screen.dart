@@ -1,3 +1,4 @@
+import 'package:alzalert/providers/alert_system_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,13 +36,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () async {
                 Navigator.of(context).pop(); // Cerrar el diálogo
                 // Cerrar sesión en Firebase
+
+                // Se cancelan las alertas
+                Provider.of<AlertSystemProvider>(
+                  context,
+                  listen: false,
+                ).stopAlertSystem();
+
                 await FirebaseAuth.instance.signOut();
                 // Limpiar el estado del usuario en el provider
                 Provider.of<UserProvider>(context, listen: false).clearUser();
                 // Navegar a la pantalla de bienvenida
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const WelcomeScreen(),
+                  ),
                   (route) => false,
                 );
               },
@@ -71,16 +81,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final now = DateTime.now();
           int years = now.year - user.birthDate!.year;
           if (now.month < user.birthDate!.month ||
-              (now.month == user.birthDate!.month && now.day < user.birthDate!.day)) {
+              (now.month == user.birthDate!.month &&
+                  now.day < user.birthDate!.day)) {
             years--;
           }
           ageText = '$years años';
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Perfil'),
-          ),
+          appBar: AppBar(title: const Text('Perfil')),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -93,20 +102,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         CircleAvatar(
                           radius: 60,
                           backgroundColor: AppTheme.divider,
-                          backgroundImage: user.profileImageUrl != null && user.profileImageUrl!.isNotEmpty
-                              ? NetworkImage(user.profileImageUrl!)
-                              : null,
-                          child: (user.profileImageUrl == null || user.profileImageUrl!.isEmpty)
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: AppTheme.textLight,
-                                )
-                              : null,
+                          backgroundImage:
+                              user.profileImageUrl != null &&
+                                      user.profileImageUrl!.isNotEmpty
+                                  ? NetworkImage(user.profileImageUrl!)
+                                  : null,
+                          child:
+                              (user.profileImageUrl == null ||
+                                      user.profileImageUrl!.isEmpty)
+                                  ? const Icon(
+                                    Icons.person,
+                                    size: 60,
+                                    color: AppTheme.textLight,
+                                  )
+                                  : null,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          user.name.isNotEmpty ? user.name : 'Nombre no disponible',
+                          user.name.isNotEmpty
+                              ? user.name
+                              : 'Nombre no disponible',
                           style: Theme.of(context).textTheme.displaySmall,
                         ),
                         const SizedBox(height: 4),
@@ -116,7 +131,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          user.address.isNotEmpty ? user.address : 'Dirección no disponible',
+                          user.address.isNotEmpty
+                              ? user.address
+                              : 'Dirección no disponible',
                           style: Theme.of(context).textTheme.bodyMedium,
                           textAlign: TextAlign.center,
                         ),
@@ -132,7 +149,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ProfileSetupScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileSetupScreen(),
+                        ),
                       );
                     },
                   ),
@@ -142,7 +161,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const MedicalInfoScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const MedicalInfoScreen(),
+                        ),
                       );
                     },
                   ),
@@ -152,7 +173,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const EmergencyContactsScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const EmergencyContactsScreen(),
+                        ),
                       );
                     },
                   ),
@@ -202,17 +225,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: textColor ?? AppTheme.primaryBlue,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 16,
-        ),
-      ),
+      leading: Icon(icon, color: textColor ?? AppTheme.primaryBlue),
+      title: Text(title, style: TextStyle(color: textColor, fontSize: 16)),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
     );

@@ -239,7 +239,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: Colors.red, fontSize: 10),
                     ),
                   ),
-                
+
                 const SizedBox(height: 30),
                 SizedBox(
                   width: 300,
@@ -248,13 +248,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30), // Un valor alto para hacerlo muy redondeado como una cápsula
+                        borderRadius: BorderRadius.circular(
+                          30,
+                        ), // Un valor alto para hacerlo muy redondeado como una cápsula
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Opcional: para darle mejor aspecto
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12,
+                      ), // Opcional: para darle mejor aspecto
                     ),
-                    child: _isLoading 
-                      ? const CircularProgressIndicator()
-                      : const Text('Iniciar Sesión', style: TextStyle(fontSize: 17),),
+                    child:
+                        _isLoading
+                            ? const CircularProgressIndicator()
+                            : const Text(
+                              'Iniciar Sesión',
+                              style: TextStyle(fontSize: 17),
+                            ),
                   ),
                 ),
                 const SizedBox(height: 14),

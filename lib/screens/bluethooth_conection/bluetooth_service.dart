@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BluetoothService {
   static final BluetoothService _instance = BluetoothService._internal();
@@ -17,6 +19,12 @@ class BluetoothService {
     'status': 'Desconectado',
     'color': Colors.red,
   });
+  Position? _lastKnownPosition;
+  DateTime? _lastUpdateTime;
+  final Duration _updateInterval = Duration(
+    minutes: 5,
+  ); // Intervalo para actualizar desde GPS
+  final Random _random = Random();
 
   ValueNotifier<Map<String, dynamic>> get statusNotifier => _statusNotifier;
 
@@ -36,6 +44,7 @@ class BluetoothService {
           return;
         }
       }
+      await _loadLastKnownPosition(); // Cargar última ubicación al iniciar
       await _scanDevices();
     } catch (e) {
       _updateStatus("Error inicializando Bluetooth", Colors.red);
@@ -180,7 +189,7 @@ class BluetoothService {
 
       debugPrint("Enviando dato: $data");
       await _targetCharacteristic!.write(data.codeUnits);
-      debugPrint("Dato enviado exitosamente: $data");
+      // debugPrint("Dato enviado exitosamente: $data");
       if (!data.startsWith("LAT:") || !data.contains(",LON:")) {
         _updateStatus("Enviado: $data", Colors.green);
       }
@@ -190,30 +199,112 @@ class BluetoothService {
     }
   }
 
-  Future<void> _sendLocation() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _updateStatus("Servicio de ubicación desactivado", Colors.orange);
-        return;
-      }
+  // Cargar última ubicación desde SharedPreferences
+  Future<void> _loadLastKnownPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lat = prefs.getDouble('last_lat');
+    final lon = prefs.getDouble('last_lon');
+    final lastUpdate = prefs.getString('last_update');
 
-      Position position = await Geolocator.getCurrentPosition(
+    if (lat != null && lon != null && lastUpdate != null) {
+      final updateTime = DateTime.parse(lastUpdate);
+      if (DateTime.now().difference(updateTime).inMinutes <
+          _updateInterval.inMinutes) {
+        _lastKnownPosition = Position(
+          latitude: lat,
+          longitude: lon,
+          timestamp: updateTime,
+          accuracy: 0.0,
+          altitude: 0.0,
+          heading: 0.0,
+          speed: 0.0,
+          speedAccuracy: 0.0,
+          altitudeAccuracy: 0.0, // Corregido: parámetro requerido
+          headingAccuracy: 0.0, // Corregido: parámetro requerido
+        );
+        _lastUpdateTime = updateTime;
+      }
+    }
+  }
+
+  // Obtener ubicación, preferiblemente desde almacenamiento
+  Future<Position?> _getLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+
+    // Verificar si la última ubicación es reciente
+    if (_lastKnownPosition != null &&
+        _lastUpdateTime != null &&
+        now.difference(_lastUpdateTime!).inMinutes <
+            _updateInterval.inMinutes) {
+      return _lastKnownPosition;
+    }
+
+    // Verificar permisos y servicio de ubicación
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _updateStatus("Servicio de ubicación desactivado", Colors.orange);
+      return null;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _updateStatus("Permiso de ubicación denegado", Colors.red);
+        return null;
+      }
+    }
+
+    try {
+      _lastKnownPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      _lastUpdateTime = now;
 
-      String locationData =
-          "LAT:${position.latitude},LON:${position.longitude}";
-      await _sendData(locationData);
+      // Guardar la ubicación en SharedPreferences
+      await prefs.setDouble('last_lat', _lastKnownPosition!.latitude);
+      await prefs.setDouble('last_lon', _lastKnownPosition!.longitude);
+      await prefs.setString('last_update', now.toIso8601String());
+
+      return _lastKnownPosition;
     } catch (e) {
       debugPrint("Error obteniendo ubicación: $e");
       _updateStatus("Error obteniendo ubicación", Colors.red);
+      return null;
+    }
+  }
+
+  // Generar variación aleatoria en latitud y longitud
+  double _addRandomVariation(double value) {
+    // Variación aleatoria entre -0.0001 y 0.0001 (aprox. ±11 metros)
+    double variation = (_random.nextDouble() * 0.0002) - 0.0001;
+    return value + variation;
+  }
+
+  Future<void> _sendLocation() async {
+    try {
+      Position? position = await _getLocation();
+      if (position == null) {
+        return;
+      }
+
+      // Aplicar variación aleatoria a la ubicación
+      double lat = _addRandomVariation(position.latitude);
+      double lon = _addRandomVariation(position.longitude);
+
+      String locationData =
+          "LAT:${lat.toStringAsFixed(6)},LON:${lon.toStringAsFixed(6)}";
+      await _sendData(locationData);
+    } catch (e) {
+      debugPrint("Error enviando ubicación: $e");
+      _updateStatus("Error enviando ubicación", Colors.red);
     }
   }
 
   void _startLocationTimer() {
     _stopLocationTimer();
-    _locationTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+    _locationTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_connectedDevice != null) {
         _sendLocation();
       } else {
