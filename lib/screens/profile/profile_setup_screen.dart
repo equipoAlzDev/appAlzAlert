@@ -18,7 +18,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _birthDateController = TextEditingController();
   final _addressController = TextEditingController();
   DateTime? _selectedDate;
-  
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +31,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         _nameController.text = user.name;
         if (user.birthDate != null) {
           _selectedDate = user.birthDate;
-          _birthDateController.text = DateFormat('dd/MM/yyyy').format(user.birthDate!);
+          _birthDateController.text = DateFormat(
+            'dd/MM/yyyy',
+          ).format(user.birthDate!);
         }
         _addressController.text = user.address;
       });
@@ -49,14 +51,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Future<void> _saveAndContinue() async {
     if (_formKey.currentState!.validate()) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      
+
       // Mostramos un indicador de carga
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
-      
+
       try {
         // Guardamos los datos usando el provider
         await userProvider.updatePersonalInfo(
@@ -65,10 +67,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           address: _addressController.text.trim(),
           profileImageUrl: userProvider.user.profileImageUrl,
         );
-        
+
         // Cerramos el diálogo de carga
         if (mounted) Navigator.of(context).pop();
-        
+
         // Navegamos a la siguiente pantalla
         if (mounted) {
           Navigator.push(
@@ -79,7 +81,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       } catch (e) {
         // Cerramos el diálogo de carga
         if (mounted) Navigator.of(context).pop();
-        
+
         // Mostramos un mensaje de error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar los datos: $e')),
@@ -108,7 +110,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         );
       },
     );
-    
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -123,30 +125,29 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return Consumer<UserProvider>(
       builder: (context, userProvider, _) {
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Datos Personales'),
-          ),
+          appBar: AppBar(title: const Text('Datos Personales')),
           body: SafeArea(
-            child: userProvider.isLoading && _nameController.text.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Información Personal',
-                            style: Theme.of(context).textTheme.displaySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Esta información es importante para identificarte en caso de emergencia',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 24),
-                          /* Center(
+            child:
+                userProvider.isLoading && _nameController.text.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Información Personal',
+                              style: Theme.of(context).textTheme.displaySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Esta información es importante para identificarte en caso de emergencia',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 24),
+                            /* Center(
                             child: Stack(
                               children: [
                                 CircleAvatar(
@@ -181,89 +182,101 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               ],
                             ),
                           ), */
-                          const SizedBox(height: 32),
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nombre completo',
-                              prefixIcon: Icon(Icons.person_outline),
+                            const SizedBox(height: 32),
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Nombre completo',
+                                prefixIcon: Icon(Icons.person_outline),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu nombre';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor ingresa tu nombre';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          TextFormField(
-                            controller: _birthDateController,
-                            readOnly: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Fecha de nacimiento',
-                              prefixIcon: Icon(Icons.calendar_today),
-                              hintText: 'DD/MM/AAAA',
+                            const SizedBox(height: 24),
+                            TextFormField(
+                              controller: _birthDateController,
+                              readOnly: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Fecha de nacimiento',
+                                prefixIcon: Icon(Icons.calendar_today),
+                                hintText: 'DD/MM/AAAA',
+                              ),
+                              onTap: () => _selectDate(context),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor selecciona tu fecha de nacimiento';
+                                }
+                                return null;
+                              },
                             ),
-                            onTap: () => _selectDate(context),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor selecciona tu fecha de nacimiento';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 24),
-                          TextFormField(
-                            controller: _addressController,
-                            decoration: const InputDecoration(
-                              labelText: 'Dirección',
-                              prefixIcon: Icon(Icons.home_outlined),
+                            const SizedBox(height: 24),
+                            TextFormField(
+                              controller: _addressController,
+                              decoration: const InputDecoration(
+                                labelText: 'Dirección',
+                                prefixIcon: Icon(Icons.home_outlined),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu dirección';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor ingresa tu dirección';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 40),
-                          Center(
-                            child: SizedBox(
-                              width: 300,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: userProvider.isLoading ? null : _saveAndContinue,
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30), // Un valor alto para hacerlo muy redondeado como una cápsula
+                            const SizedBox(height: 40),
+                            Center(
+                              child: SizedBox(
+                                width: 300,
+                                height: 56,
+                                child: ElevatedButton(
+                                  onPressed:
+                                      userProvider.isLoading
+                                          ? null
+                                          : _saveAndContinue,
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        30,
+                                      ), // Un valor alto para hacerlo muy redondeado como una cápsula
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 30,
+                                      vertical: 12,
+                                    ), // Opcional: para darle mejor aspecto
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Opcional: para darle mejor aspecto
+                                  child:
+                                      userProvider.isLoading
+                                          ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppTheme.primaryWhite,
+                                            ),
+                                          )
+                                          : const Text(
+                                            'Continuar',
+                                            style: TextStyle(fontSize: 17),
+                                          ),
                                 ),
-                                child: userProvider.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: AppTheme.primaryWhite,
-                                        ),
-                                      )
-                                    : const Text('Continuar', style: TextStyle(fontSize: 17),),
                               ),
                             ),
-                          ),
-                          if (userProvider.error != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: Text(
-                                userProvider.error!,
-                                style: const TextStyle(color: Colors.red),
+                            if (userProvider.error != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Text(
+                                  userProvider.error!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
           ),
         );
       },

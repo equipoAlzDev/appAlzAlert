@@ -34,7 +34,7 @@ void main() async {
     );
     // Considerar informar al usuario que la funcionalidad de ubicación no funcionará
   }
-  
+
   var permissions =
       await [
         Permission.bluetoothScan,
@@ -58,7 +58,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
-        ChangeNotifierProvider(create: (_) => AlertSystemProvider(navigatorKey)),
+        ChangeNotifierProvider(
+          create: (_) => AlertSystemProvider(navigatorKey),
+        ),
         ChangeNotifierProvider(create: (_) => LocationHistoryProvider()),
       ],
       child: const MyApp(),
@@ -80,10 +82,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('es', 'ES'), // Español
-        Locale('en', 'US'), // Inglés (opcional)
-      ],
+      supportedLocales: const [Locale('es', 'ES'), Locale('en', 'US')],
       locale: const Locale('es', 'ES'),
       navigatorKey: navigatorKey,
       home: const SplashScreen(),
