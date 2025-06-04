@@ -1,3 +1,5 @@
+import 'package:alzalert/screens/auth/login_screen.dart';
+import 'package:alzalert/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alzalert/models/contacto_emergencia_model.dart';
@@ -14,6 +16,8 @@ class EmergencyContactsScreen extends StatefulWidget {
 
 class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   bool _cargando = true;
+  bool _isLoading = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -29,7 +33,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     setState(() => _cargando = false);
   }
 
- void _mostrarFormulario(
+  void _mostrarFormulario(
     BuildContext context, {
     ContactoEmergenciaModel? contacto,
     required String userId,
@@ -40,9 +44,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     String relation = contacto?.relation ?? 'Familiar';
     bool isPrimary = contacto?.isPrimary ?? false;
 
-    // Obtenemos el tamaño de la pantalla
     final Size screenSize = MediaQuery.of(context).size;
-    // Definimos el ancho deseado para el dialog (80% del ancho de pantalla)
     final double dialogWidth = screenSize.width * 0.75;
 
     showDialog(
@@ -51,25 +53,28 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
           (_) => StatefulBuilder(
             builder:
                 (context, setState) => Dialog(
-                  // Usar Dialog en lugar de AlertDialog para mayor control
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   child: Container(
-                    width: dialogWidth, // Establecer ancho personalizado
+                    width: dialogWidth,
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          contacto == null ? 'Nuevo contacto' : 'Editar contacto',
+                          contacto == null
+                              ? 'Nuevo contacto'
+                              : 'Editar contacto',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: nameController,
-                          decoration: const InputDecoration(labelText: 'Nombre'),
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre',
+                          ),
                         ),
                         const SizedBox(height: 16),
                         TextField(
@@ -93,7 +98,10 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                               value: 'Cuidador',
                               child: Text('Cuidador'),
                             ),
-                            DropdownMenuItem(value: 'Otro', child: Text('Otro')),
+                            DropdownMenuItem(
+                              value: 'Otro',
+                              child: Text('Otro'),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -135,14 +143,18 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                                 );
 
                                 if (isPrimary) {
-                                  await provider.eliminarContactosPrimariosExcepto(
-                                    nuevoContacto.id,
-                                    userId,
-                                  );
+                                  await provider
+                                      .eliminarContactosPrimariosExcepto(
+                                        nuevoContacto.id,
+                                        userId,
+                                      );
                                 }
 
                                 if (contacto == null) {
-                                  await provider.agregarContacto(nuevoContacto, userId);
+                                  await provider.agregarContacto(
+                                    nuevoContacto,
+                                    userId,
+                                  );
                                 } else {
                                   await provider.editarContacto(nuevoContacto);
                                 }
@@ -178,14 +190,14 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context), // Cancelar
+                onPressed: () => Navigator.pop(context),
                 child: const Text('Cancelar'),
               ),
               ElevatedButton(
                 onPressed: () async {
                   final provider = context.read<ContactoEmergenciaProvider>();
                   await provider.eliminarContacto(contacto.id, userId);
-                  Navigator.pop(context); // Cerrar el diálogo
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text('Eliminar'),
@@ -195,72 +207,215 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     );
   }
 
+  void _saveAndContinue() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final contactProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
+    final userId = userProvider.user.id;
+    final contactos = contactProvider.contactos.where((c) => c.userId == userId).toList();
+    
+    // Verificar si hay al menos un contacto
+    if (contactos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(left: 15, right: 15, bottom: 25),
+          content: Container(
+            height: 50,
+            alignment: Alignment.center,
+            child: Text('Debes agregar al menos un contacto de emergencia'),
+          ),
+        ),
+      );
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      
+      // Verificamos el contexto de navegación para determinar a dónde ir
+      if (userProvider.navigationContext == NavigationContext.registration) {
+        // Si estamos en registro, vamos al login
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (route) => false,
+          );
+        }
+      } else {
+        // Si estamos editando, regresamos al perfil
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      // Mostrar error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar los datos: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userId = context.read<UserProvider>().user?.id ?? '';
     final provider = context.watch<ContactoEmergenciaProvider>();
-    final contactos =
-        provider.contactos.where((c) => c.userId == userId).toList();
+    final contactos = provider.contactos.where((c) => c.userId == userId).toList();
+
+    // Obtenemos el contexto de navegación para ajustar el texto del botón
+    final userProvider = Provider.of<UserProvider>(context);
+    final String buttonText = userProvider.buttonText;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Contactos de Emergencia')),
-      body:
-          _cargando
-              ? const Center(child: CircularProgressIndicator())
-              : contactos.isEmpty
-              ? const Center(child: Text('No hay contactos guardados'))
-              : ListView.builder(
-                itemCount: contactos.length,
-                itemBuilder: (context, index) {
-                  final contacto = contactos[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 1.0),
-                    child: Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(10),
-                        leading: Icon(
-                          contacto.isPrimary ? Icons.star : Icons.person,
-                          color: contacto.isPrimary ? Colors.orange : null,
-                          size: 50,
-                        ),
-                        title: Text(contacto.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(contacto.phone),
-                            Text(contacto.relation),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => _mostrarFormulario(
-                                context,
-                                contacto: contacto,
-                                userId: userId,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => _confirmarEliminacion(context, contacto, userId),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+      body: Stack(
+        children: [
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Expanded(
+                  child:
+                      _cargando
+                          ? const Center(child: CircularProgressIndicator())
+                          : contactos.isEmpty
+                          ? const Center(
+                            child: Text('No hay contactos guardados'),
+                          )
+                          : ListView.builder(
+                            itemCount: contactos.length,
+                            itemBuilder: (context, index) {
+                              final contacto = contactos[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 1.0,
+                                ),
+                                child: Card(
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(10),
+                                    leading: Icon(
+                                      contacto.isPrimary
+                                          ? Icons.star
+                                          : Icons.person,
+                                      color:
+                                          contacto.isPrimary
+                                              ? Colors.orange
+                                              : null,
+                                      size: 50,
+                                    ),
+                                    title: Text(
+                                      contacto.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(contacto.phone),
+                                        Text(contacto.relation),
+                                      ],
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          onPressed:
+                                              () => _mostrarFormulario(
+                                                context,
+                                                contacto: contacto,
+                                                userId: userId,
+                                              ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete),
+                                          onPressed:
+                                              () => _confirmarEliminacion(
+                                                context,
+                                                contacto,
+                                                userId,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                ),
+                SizedBox(height: 80),
+              ],
+            ),
+          ),
+
+          Positioned(
+            right: 24,
+            bottom: 150,
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => _mostrarFormulario(context, userId: userId),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(90),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                ),
+                child: const Icon(Icons.group_add_rounded, size: 30),
               ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _mostrarFormulario(context, userId: userId),
-        backgroundColor: Color.fromARGB(255, 0, 128, 128),
-        child: const Icon(Icons.add),
+            ),
+          ),
+
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 70,
+            child: Center(
+              child: SizedBox(
+                width: 300,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _saveAndContinue,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: const Text(
+                    'Continuar',
+                    style: TextStyle(fontSize: 17),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
