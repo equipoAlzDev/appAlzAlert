@@ -6,6 +6,7 @@ import 'package:alzalert/screens/auth/welcome_screen.dart';
 import 'package:alzalert/screens/contacts/emergency_contacts_screen.dart';
 import 'package:alzalert/screens/profile/medical_info_screen.dart';
 import 'package:alzalert/screens/profile/profile_setup_screen.dart';
+import 'package:alzalert/screens/profile/about_screen.dart';
 import 'package:alzalert/theme/app_theme.dart';
 import 'package:alzalert/providers/user_provider.dart';
 
@@ -17,15 +18,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
-  int _selectedIndex = 0;
-  
-
   void _signOut() {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Cerrar sesión'),
           content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
           actions: [
@@ -39,8 +39,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               onPressed: () async {
                 Navigator.of(context).pop(); // Cerrar el diálogo
-                // Cerrar sesión en Firebase
-
                 // Se cancelan las alertas
                 Provider.of<AlertSystemProvider>(
                   context,
@@ -93,19 +91,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Perfil')),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: AppTheme.divider,
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: const Text(
+              'Mi Perfil',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            elevation: 0,
+            backgroundColor: AppTheme.primaryBlue,
+          ),
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Colors.blue.shade50],
+              ),
+            ),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // Sección superior - Cabecera con foto
+                Container(
+                  color: AppTheme.primaryBlue,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      // Avatar con efecto de borde
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white,
                           backgroundImage:
                               user.profileImageUrl != null &&
                                       user.profileImageUrl!.isNotEmpty
@@ -116,117 +143,217 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       user.profileImageUrl!.isEmpty)
                                   ? const Icon(
                                     Icons.person,
-                                    size: 60,
-                                    color: AppTheme.textLight,
+                                    size: 50,
+                                    color: AppTheme.primaryBlue,
                                   )
                                   : null,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          user.name.isNotEmpty
-                              ? user.name
-                              : 'Nombre no disponible',
-                          style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                      const SizedBox(height: 15),
+                      // Nombre del usuario
+                      Text(
+                        user.name.isNotEmpty
+                            ? user.name
+                            : 'Nombre no disponible',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          ageText,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      if (ageText.isNotEmpty || user.address.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(top: 5, bottom: 20),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (ageText.isNotEmpty) ...[
+                                const Icon(
+                                  Icons.cake,
+                                  size: 16,
+                                  color: Colors.white70,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  ageText,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                              if (ageText.isNotEmpty && user.address.isNotEmpty)
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  height: 12,
+                                  width: 1,
+                                  color: Colors.white30,
+                                ),
+                              if (user.address.isNotEmpty) ...[
+                                const Icon(
+                                  Icons.location_on,
+                                  size: 16,
+                                  color: Colors.white70,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    user.address.length > 20
+                                        ? '${user.address.substring(0, 20)}...'
+                                        : user.address,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          user.address.isNotEmpty
-                              ? user.address
-                              : 'Dirección no disponible',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  _buildProfileOption(
-                    icon: Icons.person_outline,
-                    title: 'Editar datos personales',
-                    onTap: () {
-                      // Establecer el contexto de navegación antes de navegar
-                      final userProvider = Provider.of<UserProvider>(context, listen: false);
-                      userProvider.setNavigationContext(NavigationContext.editing);
+                ),
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfileSetupScreen(),
+                // Sección de opciones
+                Container(
+                  padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8, bottom: 12),
+                        child: Text(
+                          'Información personal',
+                          style: TextStyle(
+                            color: AppTheme.textLight,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                  _buildProfileOption(
-                    icon: Icons.medical_information_outlined,
-                    title: 'Información médica',
-                    onTap: () {
-                      // Establecer el contexto de navegación antes de navegar
-                      final userProvider = Provider.of<UserProvider>(context, listen: false);
-                      userProvider.setNavigationContext(NavigationContext.editing);
+                      ),
+                      _buildModernProfileOption(
+                        icon: Icons.person_outline,
+                        title: 'Datos personales',
+                        onTap: () {
+                          final userProvider = Provider.of<UserProvider>(
+                            context,
+                            listen: false,
+                          );
+                          userProvider.setNavigationContext(
+                            NavigationContext.editing,
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProfileSetupScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildModernProfileOption(
+                        icon: Icons.medical_information_outlined,
+                        title: 'Información médica',
+                        onTap: () {
+                          final userProvider = Provider.of<UserProvider>(
+                            context,
+                            listen: false,
+                          );
+                          userProvider.setNavigationContext(
+                            NavigationContext.editing,
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MedicalInfoScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildModernProfileOption(
+                        icon: Icons.contact_phone_outlined,
+                        title: 'Contactos de emergencia',
+                        onTap: () {
+                          final userProvider = Provider.of<UserProvider>(
+                            context,
+                            listen: false,
+                          );
+                          userProvider.setNavigationContext(
+                            NavigationContext.editing,
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => const EmergencyContactsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MedicalInfoScreen(),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8, bottom: 12),
+                        child: Text(
+                          'Información adicional',
+                          style: TextStyle(
+                            color: AppTheme.textLight,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                  _buildProfileOption(
-                    icon: Icons.contact_phone_outlined,
-                    title: 'Contactos de emergencia',
-                    onTap: () {
-                      // Establecer el contexto de navegación antes de navegar
-                      final userProvider = Provider.of<UserProvider>(context, listen: false);
-                      userProvider.setNavigationContext(NavigationContext.editing);
-                      
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EmergencyContactsScreen(),
+                      ),
+                      _buildModernProfileOption(
+                        icon: Icons.info_outline,
+                        title: 'Acerca de la aplicación',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AboutScreen(),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      // Botón de cerrar sesión
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 20),
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Cerrar sesión'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.secondaryRed.withOpacity(
+                              0.8,
+                            ),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _signOut,
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                  _buildProfileOption(
-                    icon: Icons.settings_outlined,
-                    title: 'Configuración',
-                    onTap: () {
-                      // Acción de configuración
-                    },
-                  ),
-                  _buildProfileOption(
-                    icon: Icons.help_outline,
-                    title: 'Ayuda y soporte',
-                    onTap: () {
-                      // Acción de ayuda
-                    },
-                  ),
-                  _buildProfileOption(
-                    icon: Icons.info_outline,
-                    title: 'Acerca de',
-                    onTap: () {
-                      // Mostrar información de la app
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  _buildProfileOption(
-                    icon: Icons.logout,
-                    title: 'Cerrar sesión',
-                    textColor: AppTheme.secondaryRed,
-                    onTap: _signOut,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -234,17 +361,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileOption({
+  Widget _buildModernProfileOption({
     required IconData icon,
     required String title,
-    Color? textColor,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: textColor ?? AppTheme.primaryBlue),
-      title: Text(title, style: TextStyle(color: textColor, fontSize: 16)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            spreadRadius: 0.5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 5),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryBlue.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: AppTheme.primaryBlue, size: 22),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right,
+          size: 22,
+          color: AppTheme.textLight,
+        ),
+        onTap: onTap,
+      ),
     );
   }
 }

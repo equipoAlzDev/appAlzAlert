@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:alzalert/models/contacto_emergencia_model.dart';
 import 'package:alzalert/providers/contacto_emergencia_provider.dart';
 import 'package:alzalert/providers/user_provider.dart';
+import 'package:alzalert/theme/app_theme.dart';
 
 class EmergencyContactsScreen extends StatefulWidget {
   const EmergencyContactsScreen({super.key});
@@ -209,10 +210,14 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
 
   void _saveAndContinue() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final contactProvider = Provider.of<ContactoEmergenciaProvider>(context, listen: false);
+    final contactProvider = Provider.of<ContactoEmergenciaProvider>(
+      context,
+      listen: false,
+    );
     final userId = userProvider.user.id;
-    final contactos = contactProvider.contactos.where((c) => c.userId == userId).toList();
-    
+    final contactos =
+        contactProvider.contactos.where((c) => c.userId == userId).toList();
+
     // Verificar si hay al menos un contacto
     if (contactos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -229,13 +234,12 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
       );
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
-      
       // Verificamos el contexto de navegación para determinar a dónde ir
       if (userProvider.navigationContext == NavigationContext.registration) {
         // Si estamos en registro, vamos al login
@@ -254,9 +258,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
       }
     } catch (e) {
       // Mostrar error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar los datos: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al guardar los datos: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -270,152 +274,165 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   Widget build(BuildContext context) {
     final userId = context.read<UserProvider>().user?.id ?? '';
     final provider = context.watch<ContactoEmergenciaProvider>();
-    final contactos = provider.contactos.where((c) => c.userId == userId).toList();
+    final contactos =
+        provider.contactos.where((c) => c.userId == userId).toList();
 
     // Obtenemos el contexto de navegación para ajustar el texto del botón
     final userProvider = Provider.of<UserProvider>(context);
     final String buttonText = userProvider.buttonText;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Contactos de Emergencia')),
-      body: Stack(
-        children: [
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Expanded(
-                  child:
-                      _cargando
-                          ? const Center(child: CircularProgressIndicator())
-                          : contactos.isEmpty
-                          ? const Center(
-                            child: Text('No hay contactos guardados'),
-                          )
-                          : ListView.builder(
-                            itemCount: contactos.length,
-                            itemBuilder: (context, index) {
-                              final contacto = contactos[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 1.0,
-                                ),
-                                child: Card(
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+      appBar: AppBar(
+        title: const Text('Contactos de Emergencia'),
+        backgroundColor: AppTheme.primaryBlue,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.blue.shade50],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child:
+                        _cargando
+                            ? const Center(child: CircularProgressIndicator())
+                            : contactos.isEmpty
+                            ? const Center(
+                              child: Text('No hay contactos guardados'),
+                            )
+                            : ListView.builder(
+                              itemCount: contactos.length,
+                              itemBuilder: (context, index) {
+                                final contacto = contactos[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 1.0,
                                   ),
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.all(10),
-                                    leading: Icon(
-                                      contacto.isPrimary
-                                          ? Icons.star
-                                          : Icons.person,
-                                      color:
-                                          contacto.isPrimary
-                                              ? Colors.orange
-                                              : null,
-                                      size: 50,
+                                  child: Card(
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    title: Text(
-                                      contacto.name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.all(10),
+                                      leading: Icon(
+                                        contacto.isPrimary
+                                            ? Icons.star
+                                            : Icons.person,
+                                        color:
+                                            contacto.isPrimary
+                                                ? Colors.orange
+                                                : null,
+                                        size: 50,
+                                      ),
+                                      title: Text(
+                                        contacto.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(contacto.phone),
+                                          Text(contacto.relation),
+                                        ],
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed:
+                                                () => _mostrarFormulario(
+                                                  context,
+                                                  contacto: contacto,
+                                                  userId: userId,
+                                                ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete),
+                                            onPressed:
+                                                () => _confirmarEliminacion(
+                                                  context,
+                                                  contacto,
+                                                  userId,
+                                                ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(contacto.phone),
-                                        Text(contacto.relation),
-                                      ],
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
-                                          onPressed:
-                                              () => _mostrarFormulario(
-                                                context,
-                                                contacto: contacto,
-                                                userId: userId,
-                                              ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete),
-                                          onPressed:
-                                              () => _confirmarEliminacion(
-                                                context,
-                                                contacto,
-                                                userId,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                ),
-                SizedBox(height: 80),
-              ],
-            ),
-          ),
-
-          Positioned(
-            right: 24,
-            bottom: 150,
-            child: SizedBox(
-              width: 50,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () => _mostrarFormulario(context, userId: userId),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(90),
+                                );
+                              },
+                            ),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                ),
-                child: const Icon(Icons.group_add_rounded, size: 30),
+                  SizedBox(height: 80),
+                ],
               ),
             ),
-          ),
 
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 70,
-            child: Center(
+            Positioned(
+              right: 24,
+              bottom: 150,
               child: SizedBox(
-                width: 300,
-                height: 56,
+                width: 50,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: _saveAndContinue,
+                  onPressed: () => _mostrarFormulario(context, userId: userId),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(90),
                     ),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 12,
+                      horizontal: 10,
+                      vertical: 5,
                     ),
                   ),
-                  child: const Text(
-                    'Continuar',
-                    style: TextStyle(fontSize: 17),
+                  child: const Icon(Icons.group_add_rounded, size: 30),
+                ),
+              ),
+            ),
+
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 70,
+              child: Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _saveAndContinue,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: const Text(
+                      'Continuar',
+                      style: TextStyle(fontSize: 17),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

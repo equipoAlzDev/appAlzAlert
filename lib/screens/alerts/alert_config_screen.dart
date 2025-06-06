@@ -78,9 +78,13 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
     alertSystemProvider.setPrimaryInterval(_selectedPrimaryIntervalSeconds);
     alertSystemProvider.setSecondaryInterval(_selectedSecondaryIntervalSeconds);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Configuración guardada')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Configuración guardada'),
+        backgroundColor: AppTheme.secondaryGreen,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -90,112 +94,245 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
         title: const Text('Configuración de Alertas'),
         backgroundColor: AppTheme.primaryBlue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.blue.shade50],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ListView(
+            children: [
+              // Sección informativa superior
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Row(
                   children: [
-                    Text(
-                      'Intervalo de Alerta Principal',
-                      style: Theme.of(context).textTheme.titleLarge,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.info_outline,
+                        color: AppTheme.primaryBlue,
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<int>(
-                      value: _selectedPrimaryIntervalSeconds,
-                      items:
-                          _primaryIntervalOptions.entries.map((entry) {
-                            return DropdownMenuItem<int>(
-                              value: entry.value,
-                              child: Text(entry.key),
-                            );
-                          }).toList(),
-                      onChanged: (newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedPrimaryIntervalSeconds = newValue;
-                          });
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Seleccionar intervalo',
-                        border: OutlineInputBorder(),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Configure los tiempos entre alertas para mantener un monitoreo adecuado.',
+                        style: TextStyle(
+                          color: AppTheme.primaryBlue,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Intervalo de Alerta Secundaria',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<int>(
-                      value: _selectedSecondaryIntervalSeconds,
-                      items:
-                          _secondaryIntervalOptions.entries.map((entry) {
-                            return DropdownMenuItem<int>(
-                              value: entry.value,
-                              child: Text(entry.key),
-                            );
-                          }).toList(),
-                      onChanged: (newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedSecondaryIntervalSeconds = newValue;
-                          });
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Seleccionar intervalo',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
 
-            // Button to save all configurations
-            Center(
-              child: Container(
-                width: 300, // Ancho específico en píxeles
+              // Intervalo de Alerta Principal
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Intervalo de Alerta Principal',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryBlue.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'Este es el tiempo entre verificaciones iniciales de estado. Recibirás una alerta para confirmar que te encuentras bien después de cada periodo configurado.',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppTheme.textLight,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      DropdownButtonFormField<int>(
+                        value: _selectedPrimaryIntervalSeconds,
+                        items:
+                            _primaryIntervalOptions.entries.map((entry) {
+                              return DropdownMenuItem<int>(
+                                value: entry.value,
+                                child: Text(entry.key),
+                              );
+                            }).toList(),
+                        onChanged: (newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              _selectedPrimaryIntervalSeconds = newValue;
+                            });
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Seleccionar intervalo',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.access_time),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Intervalo de Alerta Secundaria
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Intervalo de Alerta Secundaria',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryBlue.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'Este intervalo se usa cuando no respondes a la primera alerta. Es más corto que el principal y, si no respondes de nuevo, se enviará una alerta de emergencia a tus contactos.',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: AppTheme.textLight,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      DropdownButtonFormField<int>(
+                        value: _selectedSecondaryIntervalSeconds,
+                        items:
+                            _secondaryIntervalOptions.entries.map((entry) {
+                              return DropdownMenuItem<int>(
+                                value: entry.value,
+                                child: Text(entry.key),
+                              );
+                            }).toList(),
+                        onChanged: (newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              _selectedSecondaryIntervalSeconds = newValue;
+                            });
+                          }
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Seleccionar intervalo',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.access_alarm),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Botones de acción
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 child: ElevatedButton(
                   onPressed: _saveSettings,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: AppTheme.primaryBlue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
+                    elevation: 2,
                   ),
-                  child: const Text(
-                    'Guardar Configuración',
-                    style: TextStyle(fontSize: 18),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.save),
+                      SizedBox(width: 8),
+                      Text(
+                        'Guardar Configuración',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 32),
-            Center(
-              child: Container(
-                width: 300, // Ancho específico en píxeles
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -206,20 +343,28 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: const Color.fromARGB(255, 231, 112, 68),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
+                    elevation: 2,
                   ),
-                  child: const Text(
-                    'Validar conexión a Bluetooth',
-                    style: TextStyle(fontSize: 18),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.bluetooth),
+                      SizedBox(width: 8),
+                      Text(
+                        'Validar conexión a Bluetooth',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

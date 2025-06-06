@@ -28,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserProvider>(context, listen: false).loadUserData();
-      
     });
   }
 
@@ -508,173 +507,271 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             ],
           ),
           body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 30,
-                            backgroundColor: AppTheme.primaryBlue,
-                            child: const Icon(
-                              Icons.person,
-                              size: 30,
-                              color: AppTheme.primaryWhite,
-                            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.blue.shade50],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Tarjeta de perfil con diseño moderno
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                            offset: Offset(0, 3),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Bienvenido,'),
-                                Consumer<UserProvider>(
-                                  builder: (context, userProvider, _) {
-                                    final name =
-                                        userProvider.user?.name ??
-                                        ''; // Handle potential null user
-                                    return Text(
-                                      '${name.isNotEmpty ? name : 'Usuario'}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      isAlertSystemActive
-                                          ? Icons.check_circle
-                                          : Icons.cancel,
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: AppTheme.primaryBlue.withOpacity(
+                                0.1,
+                              ),
+                              child: Icon(
+                                Icons.person,
+                                size: 30,
+                                color: AppTheme.primaryBlue,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Bienvenido,',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  Consumer<UserProvider>(
+                                    builder: (context, userProvider, _) {
+                                      final name =
+                                          userProvider.user?.name ?? '';
+                                      return Text(
+                                        '${name.isNotEmpty ? name : 'Usuario'}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.primaryBlue,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
                                       color:
                                           isAlertSystemActive
                                               ? AppTheme.secondaryGreen
-                                              : AppTheme.secondaryRed,
-                                      size: 16,
+                                                  .withOpacity(0.15)
+                                              : AppTheme.secondaryRed
+                                                  .withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      isAlertSystemActive
-                                          ? 'Sistema activo'
-                                          : 'Sistema inactivo',
-                                      style: TextStyle(
-                                        color:
-                                            isAlertSystemActive
-                                                ? AppTheme.secondaryGreen
-                                                : AppTheme.secondaryRed,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap:
-                                _isSendingSMS
-                                    ? null
-                                    : _showEmergencyConfirmation,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              width: 200,
-                              height: 200,
-                              decoration: BoxDecoration(
-                                color:
-                                    _isSendingSMS
-                                        ? AppTheme.secondaryRed.withOpacity(0.7)
-                                        : isAlertSystemActive
-                                        ? AppTheme.secondaryRed
-                                        : AppTheme.secondaryRed.withOpacity(
-                                          0.4,
-                                        ), // Botón desactivado con opacidad
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        isAlertSystemActive
-                                            ? AppTheme.secondaryRed.withOpacity(
-                                              0.3,
-                                            )
-                                            : Colors
-                                                .transparent, // Sin sombra cuando está desactivado
-                                    spreadRadius: 10,
-                                    blurRadius: 20,
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child:
-                                    _isSendingSMS
-                                        ? const CircularProgressIndicator(
-                                          color: Colors.white,
-                                        )
-                                        : Text(
-                                          'EMERGENCIA',
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isAlertSystemActive
+                                              ? Icons.check_circle
+                                              : Icons.cancel,
+                                          color:
+                                              isAlertSystemActive
+                                                  ? AppTheme.secondaryGreen
+                                                  : AppTheme.secondaryRed,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          isAlertSystemActive
+                                              ? 'Sistema activo'
+                                              : 'Sistema inactivo',
                                           style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
                                             color:
                                                 isAlertSystemActive
-                                                    ? Colors.white
-                                                    : Colors.white.withOpacity(
-                                                      0.7,
-                                                    ),
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
+                                                    ? AppTheme.secondaryGreen
+                                                    : AppTheme.secondaryRed,
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            _isSendingSMS
-                                ? 'Enviando alerta...'
-                                : isAlertSystemActive
-                                ? 'Presiona el botón en caso de emergencia'
-                                : 'Sistema desactivado\nActive el sistema para usar',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyLarge?.copyWith(
-                              color:
-                                  isAlertSystemActive
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Sección central con botón de emergencia
+                    Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Botón de emergencia con animación mejorada
+                            GestureDetector(
+                              onTap:
+                                  _isSendingSMS
                                       ? null
-                                      : AppTheme.textLight,
+                                      : _showEmergencyConfirmation,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                width: 180,
+                                height: 180,
+                                decoration: BoxDecoration(
+                                  color:
+                                      _isSendingSMS
+                                          ? AppTheme.secondaryRed.withOpacity(
+                                            0.8,
+                                          )
+                                          : isAlertSystemActive
+                                          ? AppTheme.secondaryRed
+                                          : AppTheme.secondaryRed.withOpacity(
+                                            0.4,
+                                          ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          isAlertSystemActive
+                                              ? AppTheme.secondaryRed
+                                                  .withOpacity(0.3)
+                                              : Colors.transparent,
+                                      spreadRadius: 5,
+                                      blurRadius: 15,
+                                      offset: Offset(0, 5),
+                                    ),
+                                  ],
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.5),
+                                    width: 4,
+                                  ),
+                                ),
+                                child: Center(
+                                  child:
+                                      _isSendingSMS
+                                          ? const CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 3,
+                                          )
+                                          : Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.warning_amber_rounded,
+                                                color: Colors.white,
+                                                size: 50,
+                                              ),
+                                              SizedBox(height: 8),
+                                              Text(
+                                                'EMERGENCIA',
+                                                style: TextStyle(
+                                                  color:
+                                                      isAlertSystemActive
+                                                          ? Colors.white
+                                                          : Colors.white
+                                                              .withOpacity(0.7),
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 1,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                ),
+                              ),
                             ),
-                            textAlign: TextAlign.center,
+                            const SizedBox(height: 24),
+                            Text(
+                              _isSendingSMS
+                                  ? 'Enviando alerta...'
+                                  : isAlertSystemActive
+                                  ? 'Presiona el botón en caso de emergencia'
+                                  : 'Sistema desactivado\nActive el sistema para usar',
+                              style: TextStyle(
+                                color:
+                                    isAlertSystemActive
+                                        ? AppTheme.primaryBlue
+                                        : Colors.grey,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Tarjeta de información sobre el estado del sistema
+                    Container(
+                      margin: EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color:
+                            isAlertSystemActive
+                                ? AppTheme.primaryBlue.withOpacity(0.1)
+                                : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                            offset: Offset(0, 2),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                  if (isAlertSystemActive)
-                    Card(
-                      color: AppTheme.primaryBlue.withOpacity(0.1),
                       child: Padding(
-                        padding: const EdgeInsets.all(30.0),
+                        padding: const EdgeInsets.all(20.0),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: AppTheme.primaryBlue,
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color:
+                                    isAlertSystemActive
+                                        ? AppTheme.primaryBlue.withOpacity(0.15)
+                                        : Colors.grey.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isAlertSystemActive
+                                    ? Icons.info_outline
+                                    : Icons.warning_amber_outlined,
+                                color:
+                                    isAlertSystemActive
+                                        ? AppTheme.primaryBlue
+                                        : Colors.amber[800],
+                                size: 24,
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -682,17 +779,30 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Sistema de alertas activo',
+                                    isAlertSystemActive
+                                        ? 'Sistema de alertas activo'
+                                        : 'Sistema de alertas desactivado',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: AppTheme.primaryBlue,
+                                      fontSize: 16,
+                                      color:
+                                          isAlertSystemActive
+                                              ? AppTheme.primaryBlue
+                                              : Colors.grey[700],
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Recibirás alertas periódicas para verificar tu estado.',
+                                    isAlertSystemActive
+                                        ? 'Recibirás alertas periódicas para verificar tu estado.'
+                                        : 'Active el sistema para poder usar las funciones de emergencia.',
                                     style: TextStyle(
-                                      color: AppTheme.primaryBlue,
+                                      color:
+                                          isAlertSystemActive
+                                              ? AppTheme.primaryBlue
+                                                  .withOpacity(0.8)
+                                              : Colors.grey[600],
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ],
@@ -702,44 +812,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                         ),
                       ),
                     ),
-                  if (!isAlertSystemActive)
-                    Card(
-                      color: Colors.grey[600],
-                      child: Padding(
-                        padding: const EdgeInsets.all(30.0),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.warning_amber_outlined,
-                              color: Colors.amber[600],
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Sistema de alertas desactivado',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.primaryWhite,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Active el sistema para poder usar las funciones de emergencia.',
-                                    style: TextStyle(
-                                      color: AppTheme.primaryWhite,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

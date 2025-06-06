@@ -136,8 +136,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return Consumer<UserProvider>(
       builder: (context, userProvider, _) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Datos Personales')),
-          body: SafeArea(
+          appBar: AppBar(
+            title: const Text('Datos Personales'),
+            backgroundColor: AppTheme.primaryBlue,
+          ),
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Colors.blue.shade50],
+              ),
+            ),
             child:
                 userProvider.isLoading && _nameController.text.isEmpty
                     ? const Center(child: CircularProgressIndicator())
@@ -157,42 +167,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               'Esta información es importante para identificarte en caso de emergencia',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            const SizedBox(height: 24),
-                            /* Center(
-                            child: Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 60,
-                                  backgroundColor: AppTheme.divider,
-                                  backgroundImage: userProvider.user.profileImageUrl != null
-                                      ? NetworkImage(userProvider.user.profileImageUrl!)
-                                      : null,
-                                  child: userProvider.user.profileImageUrl == null
-                                      ? const Icon(
-                                          Icons.person,
-                                          size: 60,
-                                          color: AppTheme.textLight,
-                                        )
-                                      : null,
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: CircleAvatar(
-                                    backgroundColor: AppTheme.primaryBlue,
-                                    radius: 20,
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.camera_alt,
-                                        color: AppTheme.primaryWhite,
-                                      ),
-                                      onPressed:(){},
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ), */
                             const SizedBox(height: 32),
                             TextFormField(
                               controller: _nameController,

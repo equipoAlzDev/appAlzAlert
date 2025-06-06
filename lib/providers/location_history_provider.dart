@@ -13,7 +13,11 @@ class LocationHistoryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // Agrega una nueva entrada de ubicación al historial del usuario en Firestore.
-  Future<void> addLocationEntry(String userId, double latitude, double longitude) async {
+  Future<void> addLocationEntry(
+    String userId,
+    double latitude,
+    double longitude,
+  ) async {
     if (userId.isEmpty) {
       debugPrint('User ID is empty. Cannot add location entry.');
       return;
@@ -26,7 +30,10 @@ class LocationHistoryProvider with ChangeNotifier {
       // Obtener la dirección a partir de las coordenadas (geocodificación inversa)
       String address = 'Ubicación Desconocida';
       try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          latitude,
+          longitude,
+        );
         if (placemarks.isNotEmpty) {
           Placemark place = placemarks.first;
           address = '${place.street}\n${place.locality},${place.country}';
@@ -46,7 +53,7 @@ class LocationHistoryProvider with ChangeNotifier {
 
       // Escribir en Firestore
       await _firestore.collection('locationHistory').add(locationData);
-      
+
       // Actualizar la lista local y notificar a los oyentes
       final newEntry = LocationEntry(
         id: 'temp-${DateTime.now().millisecondsSinceEpoch}', // ID temporal hasta que se recargue
@@ -56,11 +63,13 @@ class LocationHistoryProvider with ChangeNotifier {
         address: address,
         timestamp: DateTime.now(),
       );
-      
+
       _locationHistory.insert(0, newEntry); // Agregar al principio de la lista
       _isLoading = false;
       notifyListeners();
-      debugPrint('Entrada de ubicación agregada: $address ($latitude, $longitude)');
+      debugPrint(
+        'Entrada de ubicación agregada: $address ($latitude, $longitude)',
+      );
     } catch (e) {
       _isLoading = false;
       debugPrint('Error al agregar entrada de ubicación: $e');
@@ -81,20 +90,42 @@ class LocationHistoryProvider with ChangeNotifier {
 
     try {
       debugPrint('Cargando historial de ubicaciones para usuario: $userId');
-      final querySnapshot = await _firestore
-          .collection('locationHistory')
-          .where('userId', isEqualTo: userId)
-          .orderBy('timestamp', descending: true)
-          .get();
+
+      // Asegurarnos que la consulta esté filtrando correctamente por userId
+      final querySnapshot =
+          await _firestore
+              .collection('locationHistory')
+              .where('userId', isEqualTo: userId)
+              .orderBy('timestamp', descending: true)
+              .get();
 
       debugPrint('Documentos encontrados: ${querySnapshot.docs.length}');
-      _locationHistory = querySnapshot.docs
-          .map((doc) => LocationEntry.fromFirestore(doc))
-          .toList();
-      
+
+      // Verificar cada documento para asegurar que corresponde al usuario correcto
+      _locationHistory =
+          querySnapshot.docs
+              .where((doc) {
+                // Verificación adicional para asegurar que el documento tenga el userId correcto
+                final data = doc.data();
+                final docUserId = data['userId'] as String?;
+                final matchesUser = docUserId == userId;
+
+                if (!matchesUser) {
+                  debugPrint(
+                    'Se encontró un documento con userId incorrecto: $docUserId, esperado: $userId',
+                  );
+                }
+
+                return matchesUser;
+              })
+              .map((doc) => LocationEntry.fromFirestore(doc))
+              .toList();
+
       _isLoading = false;
       notifyListeners();
-      debugPrint('Historial de ubicaciones cargado exitosamente');
+      debugPrint(
+        'Historial de ubicaciones cargado exitosamente: ${_locationHistory.length} entradas',
+      );
     } catch (e) {
       _isLoading = false;
       debugPrint('Error al cargar historial de ubicaciones: $e');

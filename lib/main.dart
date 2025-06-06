@@ -34,7 +34,7 @@ void main() async {
     );
     // Considerar informar al usuario que la funcionalidad de ubicación no funcionará
   }
-  
+
   var permissions =
       await [
         Permission.bluetoothScan,
@@ -42,23 +42,14 @@ void main() async {
         Permission.locationWhenInUse,
       ].request();
 
-  // Solicitar permiso de ubicación en segundo plano (opcional, pero necesario para alertas en background)
-  // Es mejor solicitarlo cuando la funcionalidad de fondo es explícitamente necesaria.
-  // Aquí lo añadimos según la declaración en AndroidManifest.xml
-  /* var backgroundLocationStatus = await Permission.locationBackground.request();
-  if (backgroundLocationStatus.isGranted) {
-   debugPrint("Permiso de ubicación en segundo plano concedido.");
-  } else {
-   debugPrint("Permiso de ubicación en segundo plano denegado: $backgroundLocationStatus");
-   // Considerar informar al usuario. La alerta en segundo plano podría no funcionar.
-  } */
-
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ContactoEmergenciaProvider()),
-        ChangeNotifierProvider(create: (_) => AlertSystemProvider(navigatorKey)),
+        ChangeNotifierProvider(
+          create: (_) => AlertSystemProvider(navigatorKey),
+        ),
         ChangeNotifierProvider(create: (_) => LocationHistoryProvider()),
       ],
       child: const MyApp(),

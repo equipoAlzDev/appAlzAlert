@@ -14,12 +14,14 @@ class MedicalInfoScreen extends StatefulWidget {
 
 class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _diagnosisController = TextEditingController(text: 'Alzheimer avanzado');
+  final _diagnosisController = TextEditingController(
+    text: 'Alzheimer avanzado',
+  );
   final _medicationsController = TextEditingController();
   final _allergiesController = TextEditingController();
   final _doctorNameController = TextEditingController();
   final _doctorPhoneController = TextEditingController();
-   bool _isLoading = false;
+  bool _isLoading = false;
 
   List<Map<String, dynamic>> _medications = [];
 
@@ -40,7 +42,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
         final nameController = TextEditingController();
         final doseController = TextEditingController();
         final timeController = TextEditingController();
-        
+
         return AlertDialog(
           title: const Text('Agregar medicamento'),
           content: Column(
@@ -55,9 +57,7 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: doseController,
-                decoration: const InputDecoration(
-                  labelText: 'Dosis',
-                ),
+                decoration: const InputDecoration(labelText: 'Dosis'),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -99,20 +99,22 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
         // Aquí guardamos los datos médicos en Firebase
         // Por implementar: guardar _medications, alergias, etc.
-        
+
         // Verificamos el contexto de navegación
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        
+
         if (userProvider.navigationContext == NavigationContext.registration) {
           // Durante el registro, vamos a la siguiente pantalla
           if (mounted) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const EmergencyContactsScreen()),
+              MaterialPageRoute(
+                builder: (context) => const EmergencyContactsScreen(),
+              ),
             );
           }
         } else {
@@ -141,67 +143,75 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Información Médica'),
+        backgroundColor: AppTheme.primaryBlue,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Datos Médicos',
-                  style: Theme.of(context).textTheme.displaySmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Esta información es crucial para emergencias médicas',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _diagnosisController,
-                  decoration: const InputDecoration(
-                    labelText: 'Diagnóstico',
-                    prefixIcon: Icon(Icons.medical_information_outlined),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.blue.shade50],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Datos Médicos',
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa el diagnóstico';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Medicamentos',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        IconButton(
-                          onPressed: _addMedication,
-                          icon: Icon(
-                            Icons.add_circle,
-                            color: AppTheme.primaryBlue,
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 8),
+                  Text(
+                    'Esta información es crucial para emergencias médicas',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _diagnosisController,
+                    decoration: const InputDecoration(
+                      labelText: 'Diagnóstico',
+                      prefixIcon: Icon(Icons.medical_information_outlined),
                     ),
-                    const SizedBox(height: 8),
-                    _medications.isEmpty
-                        ? const Text(
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor ingresa el diagnóstico';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Medicamentos',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            onPressed: _addMedication,
+                            icon: Icon(
+                              Icons.add_circle,
+                              color: AppTheme.primaryBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _medications.isEmpty
+                          ? const Text(
                             'No hay medicamentos registrados',
                             style: TextStyle(fontStyle: FontStyle.italic),
                           )
-                        : ListView.builder(
+                          : ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _medications.length,
@@ -212,9 +222,13 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                                 child: ListTile(
                                   title: Text(medication['name']),
                                   subtitle: Text(
-                                      'Dosis: ${medication['dose']}\nHorario: ${medication['time']}'),
+                                    'Dosis: ${medication['dose']}\nHorario: ${medication['time']}',
+                                  ),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.delete, color: AppTheme.secondaryRed),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: AppTheme.secondaryRed,
+                                    ),
                                     onPressed: () {
                                       setState(() {
                                         _medications.removeAt(index);
@@ -225,34 +239,43 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                               );
                             },
                           ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _allergiesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Alergias',
-                    prefixIcon: Icon(Icons.warning_amber_outlined),
+                    ],
                   ),
-                ),            
-                const SizedBox(height: 40),
-                Center(
-                  child: SizedBox(
-                    width: 300,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _saveAndContinue,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30), // Un valor alto para hacerlo muy redondeado como una cápsula
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12), // Opcional: para darle mejor aspecto
-                      ),
-                      child: const Text('Continuar', style: TextStyle(fontSize: 17),),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _allergiesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Alergias',
+                      prefixIcon: Icon(Icons.warning_amber_outlined),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 40),
+                  Center(
+                    child: SizedBox(
+                      width: 300,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _saveAndContinue,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              30,
+                            ), // Un valor alto para hacerlo muy redondeado como una cápsula
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 12,
+                          ), // Opcional: para darle mejor aspecto
+                        ),
+                        child: const Text(
+                          'Continuar',
+                          style: TextStyle(fontSize: 17),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -260,4 +283,3 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
     );
   }
 }
-
