@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:alzalert/providers/alert_system_provider.dart';
 import 'package:alzalert/providers/contacto_emergencia_provider.dart';
+import 'package:alzalert/providers/medical_info_provider.dart';
 import 'package:alzalert/screens/splash_screen.dart';
 import 'package:alzalert/theme/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -51,6 +52,7 @@ void main() async {
           create: (_) => AlertSystemProvider(navigatorKey),
         ),
         ChangeNotifierProvider(create: (_) => LocationHistoryProvider()),
+        ChangeNotifierProvider(create: (_) => MedicalInfoProvider()),
       ],
       child: const MyApp(),
     ),

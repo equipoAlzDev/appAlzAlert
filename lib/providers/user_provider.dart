@@ -2,6 +2,7 @@ import 'package:alzalert/main.dart';
 import 'package:alzalert/providers/alert_system_provider.dart';
 import 'package:alzalert/providers/contacto_emergencia_provider.dart';
 import 'package:alzalert/providers/location_history_provider.dart';
+import 'package:alzalert/providers/medical_info_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -170,6 +171,17 @@ class UserProvider extends ChangeNotifier {
         listen: false,
       );
       contactosProvider.resetContactos();
+
+      // Limpiar información médica
+      try {
+        final medicalInfoProvider = Provider.of<MedicalInfoProvider>(
+          navigatorKey.currentContext!,
+          listen: false,
+        );
+        medicalInfoProvider.clearMedicalInfo();
+      } catch (e) {
+        debugPrint('Error al limpiar la información médica: $e');
+      }
     }
     notifyListeners();
   }
