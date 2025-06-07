@@ -81,7 +81,7 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Configuración guardada'),
-        backgroundColor: AppTheme.secondaryGreen,
+        backgroundColor: AppTheme.primaryBlue,
         behavior: SnackBarBehavior.floating,
       ),
     );

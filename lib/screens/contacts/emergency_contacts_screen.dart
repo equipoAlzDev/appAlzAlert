@@ -222,7 +222,7 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     if (contactos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.secondaryRed,
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.only(left: 15, right: 15, bottom: 25),
           content: Container(
@@ -258,9 +258,13 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
       }
     } catch (e) {
       // Mostrar error
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al guardar los datos: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al guardar los datos: $e'),
+          backgroundColor: AppTheme.secondaryRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {

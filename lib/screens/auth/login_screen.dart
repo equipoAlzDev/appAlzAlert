@@ -148,6 +148,8 @@ class _LoginScreenState extends State<LoginScreen>
             content: Text(
               'Se ha enviado un correo para restablecer tu contraseña',
             ),
+            backgroundColor: AppTheme.primaryBlue,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }

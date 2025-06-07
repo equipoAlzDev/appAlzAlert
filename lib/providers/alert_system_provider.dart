@@ -6,6 +6,7 @@ import 'package:alzalert/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/alerts/alert_dialog_screen.dart';
+import '../theme/app_theme.dart'; // Import AppTheme
 import 'package:telephony/telephony.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart'; // Import geolocator
@@ -395,6 +396,11 @@ class AlertSystemProvider with ChangeNotifier {
                     ? 'Alertas de emergencia enviadas'
                     : 'Algunas alertas podrían no haberse enviado correctamente',
               ),
+              backgroundColor:
+                  allSentSuccessfully
+                      ? AppTheme.primaryBlue
+                      : AppTheme.secondaryRed,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -404,6 +410,8 @@ class AlertSystemProvider with ChangeNotifier {
           ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
             const SnackBar(
               content: Text('No hay contactos de emergencia configurados'),
+              backgroundColor: AppTheme.secondaryRed,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -411,9 +419,13 @@ class AlertSystemProvider with ChangeNotifier {
     } catch (e) {
       debugPrint('Exception in _handleFinalTimeout: $e');
       if (_navigatorKey.currentContext != null) {
-        ScaffoldMessenger.of(
-          _navigatorKey.currentContext!,
-        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ScaffoldMessenger.of(_navigatorKey.currentContext!).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppTheme.secondaryRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } finally {
       _retryCount = 0;

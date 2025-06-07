@@ -167,6 +167,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             alertSystemProvider.isAlertSystemActive
                 ? AppTheme.secondaryGreen
                 : AppTheme.secondaryRed,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -261,6 +262,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             const SnackBar(
               content: Text('Error: Usuario no identificado para enviar SMS.'),
               backgroundColor: AppTheme.secondaryRed,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -324,7 +326,8 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Alerta enviada a contactos de emergencia'),
-              backgroundColor: Color.fromARGB(255, 255, 165, 0),
+              backgroundColor: AppTheme.primaryBlue,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -337,6 +340,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 'No hay números de contacto disponibles para enviar la alerta.',
               ),
               backgroundColor: AppTheme.secondaryRed,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -348,6 +352,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           SnackBar(
             content: Text('Error al enviar alerta: ${e.toString()}'),
             backgroundColor: AppTheme.secondaryRed,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -386,6 +391,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 'Permisos de SMS y Teléfono necesarios para enviar alertas.',
               ),
               backgroundColor: AppTheme.secondaryRed,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -408,6 +414,7 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         const SnackBar(
           content: Text('Sistema de alertas desactivado.'),
           backgroundColor: AppTheme.secondaryRed,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
