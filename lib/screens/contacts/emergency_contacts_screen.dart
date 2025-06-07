@@ -423,9 +423,9 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                         vertical: 12,
                       ),
                     ),
-                    child: const Text(
-                      'Continuar',
-                      style: TextStyle(fontSize: 17),
+                    child: Text(
+                      buttonText,
+                      style: const TextStyle(fontSize: 17),
                     ),
                   ),
                 ),

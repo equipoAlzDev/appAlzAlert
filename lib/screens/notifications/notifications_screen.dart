@@ -50,7 +50,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Borrar notificaciones'),
-          content: const Text('¿Estás seguro de que deseas borrar todas las notificaciones?'),
+          content: const Text(
+            '¿Estás seguro de que deseas borrar todas las notificaciones?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -93,104 +95,105 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
         ],
       ),
-      body: _notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_off,
-                    size: 80,
-                    color: AppTheme.textLight,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No hay notificaciones',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              itemCount: _notifications.length,
-              itemBuilder: (context, index) {
-                final notification = _notifications[index];
-                
-                IconData iconData;
-                Color iconColor;
-                
-                switch (notification['type']) {
-                  case 'alert':
-                    iconData = Icons.notifications;
-                    iconColor = AppTheme.primaryBlue;
-                    break;
-                  case 'response':
-                    iconData = Icons.check_circle;
-                    iconColor = AppTheme.secondaryGreen;
-                    break;
-                  case 'emergency':
-                    iconData = Icons.warning;
-                    iconColor = AppTheme.secondaryRed;
-                    break;
-                  default:
-                    iconData = Icons.info;
-                    iconColor = AppTheme.primaryBlue;
-                }
-                
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  color: notification['read']
-                      ? null
-                      : AppTheme.primaryBlue.withOpacity(0.05),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: iconColor.withOpacity(0.2),
-                      child: Icon(
-                        iconData,
-                        color: iconColor,
-                      ),
+      body:
+          _notifications.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.notifications_off,
+                      size: 80,
+                      color: AppTheme.textLight,
                     ),
-                    title: Text(
-                      notification['title'],
-                      style: TextStyle(
-                        fontWeight:
-                            notification['read'] ? FontWeight.normal : FontWeight.bold,
-                      ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No hay notificaciones',
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(notification['message']),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${notification['date']} - ${notification['time']}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.textLight,
-                          ),
+                  ],
+                ),
+              )
+              : ListView.builder(
+                itemCount: _notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = _notifications[index];
+
+                  IconData iconData;
+                  Color iconColor;
+
+                  switch (notification['type']) {
+                    case 'alert':
+                      iconData = Icons.notifications;
+                      iconColor = AppTheme.primaryBlue;
+                      break;
+                    case 'response':
+                      iconData = Icons.check_circle;
+                      iconColor = AppTheme.secondaryGreen;
+                      break;
+                    case 'emergency':
+                      iconData = Icons.warning;
+                      iconColor = AppTheme.secondaryRed;
+                      break;
+                    default:
+                      iconData = Icons.info;
+                      iconColor = AppTheme.primaryBlue;
+                  }
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    color:
+                        notification['read']
+                            ? null
+                            : AppTheme.primaryBlue.withOpacity(0.05),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: iconColor.withOpacity(0.2),
+                        child: Icon(iconData, color: iconColor),
+                      ),
+                      title: Text(
+                        notification['title'],
+                        style: TextStyle(
+                          fontWeight:
+                              notification['read']
+                                  ? FontWeight.normal
+                                  : FontWeight.bold,
                         ),
-                      ],
-                    ),
-                    trailing: notification['read']
-                        ? null
-                        : IconButton(
-                            icon: const Icon(Icons.mark_email_read),
-                            onPressed: () => _markAsRead(index),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(notification['message']),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${notification['date']} - ${notification['time']}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textLight,
+                            ),
                           ),
-                    isThreeLine: true,
-                    onTap: () {
-                      if (!notification['read']) {
-                        _markAsRead(index);
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
+                        ],
+                      ),
+                      trailing:
+                          notification['read']
+                              ? null
+                              : IconButton(
+                                icon: const Icon(Icons.mark_email_read),
+                                onPressed: () => _markAsRead(index),
+                              ),
+                      isThreeLine: true,
+                      onTap: () {
+                        if (!notification['read']) {
+                          _markAsRead(index);
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
     );
   }
 }
-

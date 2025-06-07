@@ -15,7 +15,6 @@ class ContactoEmergenciaModel {
     required this.userId,
   });
 
-
   factory ContactoEmergenciaModel.empty() {
     return ContactoEmergenciaModel(
       id: '',
@@ -66,4 +65,3 @@ class ContactoEmergenciaModel {
     );
   }
 }
-

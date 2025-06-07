@@ -184,6 +184,7 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
                       color: AppTheme.primaryWhite,
                       fontWeight: FontWeight.bold,
+                      fontSize: 30,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -225,7 +226,7 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
                                       .secondaryGreen, // Green color from theme
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
-                                  15,
+                                  50,
                                 ), // Rounded corners
                               ),
                             ),
@@ -254,7 +255,7 @@ class _AlertDialogScreenState extends State<AlertDialogScreen> {
                                   AppTheme.secondaryRed, // Red color from theme
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
-                                  15,
+                                  50,
                                 ), // Rounded corners
                               ),
                             ),

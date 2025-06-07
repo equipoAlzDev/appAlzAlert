@@ -17,11 +17,7 @@ class UserModel {
 
   // Constructor para crear un usuario vacío
   factory UserModel.empty() {
-    return UserModel(
-      id: '',
-      name: '',
-      address: '',
-    );
+    return UserModel(id: '', name: '', address: '');
   }
 
   // Método para crear un objeto a partir de datos de Firestore
@@ -29,9 +25,10 @@ class UserModel {
     return UserModel(
       id: id,
       name: data['name'] ?? '',
-      birthDate: data['birthDate'] != null 
-          ? (data['birthDate'] as Timestamp).toDate() 
-          : null,
+      birthDate:
+          data['birthDate'] != null
+              ? (data['birthDate'] as Timestamp).toDate()
+              : null,
       address: data['address'] ?? '',
       profileImageUrl: data['profileImageUrl'],
     );

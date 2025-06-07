@@ -267,9 +267,9 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
                             vertical: 12,
                           ), // Opcional: para darle mejor aspecto
                         ),
-                        child: const Text(
-                          'Continuar',
-                          style: TextStyle(fontSize: 17),
+                        child: Text(
+                          Provider.of<UserProvider>(context).buttonText,
+                          style: const TextStyle(fontSize: 17),
                         ),
                       ),
                     ),

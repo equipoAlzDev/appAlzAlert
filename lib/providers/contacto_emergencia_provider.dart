@@ -70,12 +70,12 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
     try {
       // Primero elimina en Firestore
       await _db.doc(contactoId).delete();
-      
+
       // Luego busca y elimina en memoria
       final index = _contactos.indexWhere(
         (c) => c.id == contactoId && c.userId == userId,
       );
-      
+
       // Verificación adicional para evitar error de índice
       if (index >= 0 && index < _contactos.length) {
         _contactos.removeAt(index);
@@ -99,12 +99,13 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
   ) async {
     try {
       // Lista de contactos a actualizar para evitar modificar la lista durante la iteración
-      final contactosAActualizar = _contactos
-          .where(
-            (c) => c.userId == userId && c.isPrimary && c.id != contactoId,
-          )
-          .toList();
-      
+      final contactosAActualizar =
+          _contactos
+              .where(
+                (c) => c.userId == userId && c.isPrimary && c.id != contactoId,
+              )
+              .toList();
+
       // actualiza los contactos del usuario actual en memoria
       for (final contacto in contactosAActualizar) {
         final actualizado = contacto.copyWith(isPrimary: false);
@@ -134,7 +135,7 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
       await recargarContactos(userId);
     }
   }
-  
+
   // Método para limpiar los contactos al cerrar sesión
   void resetContactos() {
     _contactos.clear();

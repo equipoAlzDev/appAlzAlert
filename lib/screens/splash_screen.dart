@@ -44,18 +44,18 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'AlzAlert',
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: AppTheme.primaryWhite,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30,
-                  ),
+                color: AppTheme.primaryWhite,
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               'Cuidando a quienes más importan',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.primaryWhite,
-                    fontSize: 23,
-                  ),
+                color: AppTheme.primaryWhite,
+                fontSize: 23,
+              ),
             ),
           ],
         ),
@@ -63,4 +63,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

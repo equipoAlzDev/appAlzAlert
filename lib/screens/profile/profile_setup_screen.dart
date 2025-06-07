@@ -243,9 +243,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                               color: AppTheme.primaryWhite,
                                             ),
                                           )
-                                          : const Text(
-                                            'Continuar',
-                                            style: TextStyle(fontSize: 17),
+                                          : Text(
+                                            userProvider.buttonText,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
                                           ),
                                 ),
                               ),

@@ -57,7 +57,10 @@ class _LockScreenInfoState extends State<LockScreenInfo> {
               _buildInfoSection('Diagnóstico:', 'Alzheimer avanzado'),
               _buildInfoSection('Alergias:', 'Penicilina, Aspirina'),
               _buildInfoSection('Medicamentos:', 'Donepezilo, Memantina'),
-              _buildInfoSection('Contacto de emergencia:', 'María Pérez (Hija) - 555-123-4567'),
+              _buildInfoSection(
+                'Contacto de emergencia:',
+                'María Pérez (Hija) - 555-123-4567',
+              ),
               const SizedBox(height: 48),
               Center(
                 child: Column(
@@ -104,10 +107,7 @@ class _LockScreenInfoState extends State<LockScreenInfo> {
                   ),
                   child: const Text(
                     'Estoy bien',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -145,4 +145,3 @@ class _LockScreenInfoState extends State<LockScreenInfo> {
     );
   }
 }
-

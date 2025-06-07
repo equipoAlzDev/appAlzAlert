@@ -4,11 +4,11 @@ class AppTheme {
   // Primary Colors
   static const Color primaryBlue = Color.fromARGB(255, 0, 128, 128);
   static const Color primaryWhite = Color(0xFFFFFFFF);
-  
+
   // Secondary Colors
   static const Color secondaryGreen = Color(0xFF4CAF50);
   static const Color secondaryRed = Color(0xFFFF5252);
-  
+
   // Additional Colors
   static const Color textDark = Color(0xFF333333);
   static const Color textLight = Color(0xFF757575);
@@ -29,23 +29,15 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryBlue,
         foregroundColor: primaryWhite,
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: primaryBlue,
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-        ),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -86,14 +78,8 @@ class AppTheme {
         fontWeight: FontWeight.bold,
         color: textDark,
       ),
-      bodyLarge: TextStyle(
-        fontSize: 18,
-        color: textDark,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 16,
-        color: textDark,
-      ),
+      bodyLarge: TextStyle(fontSize: 18, color: textDark),
+      bodyMedium: TextStyle(fontSize: 16, color: textDark),
     ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       primary: primaryBlue,
@@ -102,4 +88,3 @@ class AppTheme {
     ),
   );
 }
-

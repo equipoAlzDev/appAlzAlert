@@ -331,23 +331,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 30),
 
                       // Botón de cerrar sesión
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 20),
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.logout),
-                          label: const Text('Cerrar sesión'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.secondaryRed.withOpacity(
-                              0.8,
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          width: 300,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.logout),
+                            label: const Text('Cerrar sesión'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.secondaryRed
+                                  .withOpacity(0.8),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
                             ),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                            onPressed: _signOut,
                           ),
-                          onPressed: _signOut,
                         ),
                       ),
                     ],

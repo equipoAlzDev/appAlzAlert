@@ -310,30 +310,7 @@ class _LocationHistoryScreenState extends State<LocationHistoryScreen> {
                                       ],
                                     ),
                                   ),
-                                  trailing: IconButton(
-                                    icon: const Icon(
-                                      Icons.map,
-                                      color: AppTheme.primaryBlue,
-                                    ),
-                                    onPressed: () {
-                                      // Función para abrir ubicación en mapa
-                                      final lat =
-                                          location['coordinates']['lat'];
-                                      final lng =
-                                          location['coordinates']['lng'];
-                                      debugPrint('Abrir mapa para: $lat, $lng');
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Funcionalidad de abrir mapa no implementada aún.',
-                                          ),
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                  // Se eliminó el icono de mapa
                                 ),
                               );
                             },
