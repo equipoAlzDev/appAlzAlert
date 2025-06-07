@@ -21,9 +21,9 @@ class AlertSystemProvider with ChangeNotifier {
 
   // Configurable intervals (in seconds), initialized with test values
   int _configuredPrimaryIntervalSeconds =
-      20; // Default to 20 seconds for testing
+      3600; // Default to 20 seconds for testing
   int _configuredSecondaryIntervalSeconds =
-      10; // Default to 10 seconds for testing
+      300; // Default to 10 seconds for testing
 
   bool _isDialogShown = false;
   bool _isSecondaryTimer = false; // Flag to identify the current timer
@@ -351,7 +351,7 @@ class AlertSystemProvider with ChangeNotifier {
 
       // Crear mensaje simple sin caracteres especiales ni URLs
       String mensaje =
-          'EMERGENCIA! ${userProvider.user?.name ?? 'Usuario'} ha referido no estar bien, puede que necesite ayuda.';
+          'ALZALERT: ${userProvider.user?.name ?? 'Usuario'} ha referido no estar bien, puede que necesite ayuda.';
 
       // Agregar ubicación si disponible, en formato simple
       if (_currentLocationString.isNotEmpty &&

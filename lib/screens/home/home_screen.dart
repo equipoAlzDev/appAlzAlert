@@ -289,13 +289,13 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
 
       // Mensaje de emergencia
       String mensaje =
-          'EMERGENCIA! ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda urgente';
+          'ALZALERT: ${userName.isNotEmpty ? userName : 'Usuario'} necesita ayuda inmediata.';
 
       // Agregar ubicación si disponible, en formato simple
       if (_currentLocationString.isNotEmpty &&
           !_currentLocationString.startsWith('Error')) {
         mensaje +=
-            '\nUbicacion: https://www.google.com/maps/search/?api=1&query=$_currentLocationString';
+            '\nUbicacion actual: https://www.google.com/maps/search/?api=1&query=$_currentLocationString';
       }
 
       // Enviar SMS solo a los contactos de emergencia
