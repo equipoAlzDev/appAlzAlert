@@ -141,6 +141,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             backgroundColor: AppTheme.primaryBlue,
           ),
           body: Container(
+            height: double.infinity,
+            width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,

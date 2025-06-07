@@ -201,6 +201,8 @@ class _MedicalInfoScreenState extends State<MedicalInfoScreen> {
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Container(
+                height: double.infinity,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
