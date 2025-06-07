@@ -103,7 +103,6 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   bool _isSendingSMS = false;
   bool _contactosCargados = false;
   final Telephony telephony = Telephony.instance;
-  final String _emergencyNumber = "3157042961";
   // Variable para almacenar la ubicación capturada
   String _currentLocationString = '';
   double?
@@ -299,29 +298,21 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             '\nUbicacion: https://www.google.com/maps/search/?api=1&query=$_currentLocationString';
       }
 
-      // Enviar SMS a todos los contactos
-      List<String> numeros = []; // List to hold phone numbers
-
+      // Enviar SMS solo a los contactos de emergencia
       if (contactos.isNotEmpty) {
-        // Add all contact numbers
-        numeros = contactos.map((c) => c.phone).toList();
-        debugPrint('Sending emergency SMS to configured contacts.');
-      } else {
-        // Si no hay contactos registrados, usar el número predeterminado
-        numeros.add(_emergencyNumber);
-        debugPrint(
-          'No contacts found. Sending emergency SMS to default number: $_emergencyNumber',
-        );
-      }
+        // Obtener números de teléfono de los contactos
+        final numeros = contactos.map((c) => c.phone).toList();
 
-      if (numeros.isNotEmpty) {
-        // Send all SMS in parallel
+        // Enviar SMS en paralelo a todos los contactos
         await Future.wait(
           numeros.map(
             (numero) => telephony.sendSms(to: numero, message: mensaje),
           ),
         );
-        debugPrint('Emergency SMS sent successfully.');
+
+        debugPrint(
+          'Emergency SMS sent successfully to ${numeros.length} contacts.',
+        );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -332,12 +323,14 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
           );
         }
       } else {
-        debugPrint('No phone numbers available to send SMS.');
+        debugPrint(
+          'No hay contactos de emergencia configurados para enviar SMS.',
+        );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'No hay números de contacto disponibles para enviar la alerta.',
+                'No hay contactos de emergencia configurados. Configure contactos en el menú de configuración.',
               ),
               backgroundColor: AppTheme.secondaryRed,
               behavior: SnackBarBehavior.floating,
@@ -432,11 +425,23 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     final contactos =
         contactosProvider.contactos.where((c) => c.userId == userId).toList();
 
+    // Verificar si hay contactos configurados
+    if (contactos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No hay contactos de emergencia configurados. Configure contactos en el menú de configuración.',
+          ),
+          backgroundColor: AppTheme.secondaryRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     // Texto para mostrar a quién se enviará la alerta
     final String destinatarioText =
-        contactos.isNotEmpty
-            ? '${contactos.length} contacto${contactos.length > 1 ? 's' : ''} de emergencia'
-            : 'número de emergencia predeterminado';
+        '${contactos.length} contacto${contactos.length > 1 ? 's' : ''} de emergencia';
 
     showDialog(
       context: context,
