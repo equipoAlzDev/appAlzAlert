@@ -25,23 +25,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Solicitar permiso de ubicación en primer plano
+  // Solicitud de permisos
   var locationStatus = await Permission.location.request();
-  if (locationStatus.isGranted) {
-    debugPrint("Permiso de ubicación en primer plano concedido.");
-  } else {
+  if (!locationStatus.isGranted) {
     debugPrint(
       "Permiso de ubicación en primer plano denegado: $locationStatus",
     );
-    // Considerar informar al usuario que la funcionalidad de ubicación no funcionará
   }
 
-  var permissions =
-      await [
-        Permission.bluetoothScan,
-        Permission.bluetoothConnect,
-        Permission.locationWhenInUse,
-      ].request();
+  await [
+    Permission.bluetoothScan,
+    Permission.bluetoothConnect,
+    Permission.locationWhenInUse,
+  ].request();
 
   runApp(
     MultiProvider(
@@ -73,10 +69,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('es', 'ES'), // Español
-        Locale('en', 'US'), // Inglés (opcional)
-      ],
+      supportedLocales: const [Locale('es', 'ES'), Locale('en', 'US')],
       locale: const Locale('es', 'ES'),
       navigatorKey: navigatorKey,
       home: const SplashScreen(),

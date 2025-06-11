@@ -106,7 +106,6 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
           padding: const EdgeInsets.all(20.0),
           child: ListView(
             children: [
-              // Sección informativa superior
               Container(
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
@@ -141,7 +140,6 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
                 ),
               ),
 
-              // Intervalo de Alerta Principal
               Container(
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
@@ -221,7 +219,6 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
                 ),
               ),
 
-              // Intervalo de Alerta Secundaria
               Container(
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
@@ -301,7 +298,6 @@ class _AlertConfigScreenState extends State<AlertConfigScreen> {
                 ),
               ),
 
-              // Botones de acción
               const SizedBox(height: 20),
               Container(
                 width: double.infinity,

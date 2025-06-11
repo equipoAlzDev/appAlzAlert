@@ -9,11 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:alzalert/models/user_model.dart';
 import 'package:provider/provider.dart';
 
-// Enum para definir los contextos de navegación
-enum NavigationContext {
-  registration, // Durante el proceso de registro
-  editing, // Editando información existente
-}
+enum NavigationContext { registration, editing }
 
 class UserProvider extends ChangeNotifier {
   UserModel _user = UserModel.empty();
@@ -21,32 +17,26 @@ class UserProvider extends ChangeNotifier {
   String? _error;
   NavigationContext _navigationContext = NavigationContext.registration;
 
-  // Getters
   UserModel get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
   NavigationContext get navigationContext => _navigationContext;
 
-  // Getter para determinar si es un usuario nuevo
   bool get isNewUser => _user.name.isEmpty || _user.address.isEmpty;
 
-  // Getter para determinar texto del botón
   String get buttonText =>
       _navigationContext == NavigationContext.registration
           ? 'Continuar'
           : 'Guardar';
 
-  // Referencias a Firebase
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Método para establecer el contexto de navegación
   void setNavigationContext(NavigationContext context) {
     _navigationContext = context;
     notifyListeners();
   }
 
-  // Método para cargar los datos del usuario actual
   Future<void> loadUserData() async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return;
@@ -62,12 +52,10 @@ class UserProvider extends ChangeNotifier {
       if (docSnapshot.exists) {
         _user = UserModel.fromMap(currentUser.uid, docSnapshot.data()!);
 
-        // Si el usuario ya tiene datos completos, probablemente está editando
         if (!isNewUser) {
           _navigationContext = NavigationContext.editing;
         }
       } else {
-        // Si el documento no existe, creamos uno nuevo con los datos básicos
         _user = UserModel(
           id: currentUser.uid,
           name: currentUser.displayName ?? '',
@@ -83,10 +71,8 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Método para obtener el LocationHistoryProvider
   LocationHistoryProvider? _getLocationHistoryProvider() {
     try {
-      // Intentar obtener el provider desde el árbol de widgets
       return navigatorKey.currentContext != null
           ? Provider.of<LocationHistoryProvider>(
             navigatorKey.currentContext!,
@@ -99,7 +85,6 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Método para actualizar los datos personales del usuario
   Future<void> updatePersonalInfo({
     required String name,
     DateTime? birthDate,
@@ -114,7 +99,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Actualizamos el modelo local
       _user = _user.copyWith(
         name: name,
         birthDate: birthDate,
@@ -122,13 +106,10 @@ class UserProvider extends ChangeNotifier {
         profileImageUrl: profileImageUrl,
       );
 
-      // Guardamos en Firestore
       await _firestore
           .collection('users')
           .doc(currentUser.uid)
           .set(_user.toMap(), SetOptions(merge: true));
-
-      // También actualizamos el displayName en Firebase Auth
       await currentUser.updateDisplayName(name);
     } catch (e) {
       _error = 'Error al actualizar los datos: $e';
@@ -138,7 +119,6 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Método para actualizar solo la URL de la imagen de perfil
   Future<void> updateProfileImage(String imageUrl) async {
     await updatePersonalInfo(
       name: _user.name,
@@ -148,31 +128,24 @@ class UserProvider extends ChangeNotifier {
     );
   }
 
-  // Método para limpiar los datos cuando el usuario cierra sesión
   void clearUser() {
     _user = UserModel.empty();
-    // Limpiar datos en otros providers
     if (navigatorKey.currentContext != null) {
-      // Limpiar datos de alertas
       final alertProvider = Provider.of<AlertSystemProvider>(
         navigatorKey.currentContext!,
         listen: false,
       );
 
-      // Limpiar historial de ubicaciones
       final locationProvider = Provider.of<LocationHistoryProvider>(
         navigatorKey.currentContext!,
         listen: false,
       );
 
-      // Limpiar contactos de emergencia
       final contactosProvider = Provider.of<ContactoEmergenciaProvider>(
         navigatorKey.currentContext!,
         listen: false,
       );
       contactosProvider.resetContactos();
-
-      // Limpiar información médica
       try {
         final medicalInfoProvider = Provider.of<MedicalInfoProvider>(
           navigatorKey.currentContext!,
@@ -186,11 +159,9 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Método para obtener la ruta de navegación apropiada
   String getNextRoute() {
     switch (_navigationContext) {
       case NavigationContext.registration:
-        // Lógica del flujo de registro
         if (_user.name.isEmpty || _user.address.isEmpty) {
           return '/medical-info';
         } else {

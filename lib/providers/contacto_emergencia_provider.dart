@@ -12,14 +12,13 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
 
   final _db = FirebaseFirestore.instance.collection('contactos_emergencia');
 
-  // Método para recargar contactos forzadamente
   Future<void> recargarContactos(String userId) async {
     _contactosCargados = false;
     await cargarContactos(userId);
   }
 
   Future<void> cargarContactos(String userId) async {
-    if (_contactosCargados) return; // No volver a cargar si ya están cargados
+    if (_contactosCargados) return;
 
     try {
       final snapshot = await _db.where('userId', isEqualTo: userId).get();
@@ -32,7 +31,6 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error al cargar contactos: $e');
       _contactosCargados = false;
-      // Se podría lanzar una excepción aquí o manejar el error de otra forma
     }
   }
 
@@ -48,7 +46,6 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error al agregar contacto: $e');
-      // Manejo del error
     }
   }
 
@@ -62,43 +59,33 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error al editar contacto: $e');
-      // Manejo del error
     }
   }
 
   Future<void> eliminarContacto(String contactoId, String userId) async {
     try {
-      // Primero elimina en Firestore
       await _db.doc(contactoId).delete();
-
-      // Luego busca y elimina en memoria
       final index = _contactos.indexWhere(
         (c) => c.id == contactoId && c.userId == userId,
       );
 
-      // Verificación adicional para evitar error de índice
       if (index >= 0 && index < _contactos.length) {
         _contactos.removeAt(index);
         notifyListeners();
       } else {
-        // Si no se encuentra en memoria pero se eliminó en Firestore
-        // Recargamos los contactos para sincronizar
         await recargarContactos(userId);
       }
     } catch (e) {
       debugPrint('Error al eliminar contacto: $e');
-      // En caso de error, intentamos recargar para asegurar consistencia
       await recargarContactos(userId);
     }
   }
 
-  // desmarcar el contacto primario actual y marcar el nuevo
   Future<void> eliminarContactosPrimariosExcepto(
     String contactoId,
     String userId,
   ) async {
     try {
-      // Lista de contactos a actualizar para evitar modificar la lista durante la iteración
       final contactosAActualizar =
           _contactos
               .where(
@@ -106,7 +93,6 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
               )
               .toList();
 
-      // actualiza los contactos del usuario actual en memoria
       for (final contacto in contactosAActualizar) {
         final actualizado = contacto.copyWith(isPrimary: false);
         final idx = _contactos.indexWhere((c) => c.id == actualizado.id);
@@ -115,7 +101,6 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
         }
       }
 
-      // actualiza en Firestore los docs de este mismo userId
       final snapshot =
           await _db
               .where('userId', isEqualTo: userId)
@@ -131,12 +116,10 @@ class ContactoEmergenciaProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error al actualizar contactos primarios: $e');
-      // En caso de error, intentamos recargar para asegurar consistencia
       await recargarContactos(userId);
     }
   }
 
-  // Método para limpiar los contactos al cerrar sesión
   void resetContactos() {
     _contactos.clear();
     _contactosCargados = false;

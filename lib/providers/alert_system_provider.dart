@@ -12,106 +12,82 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart'; // Import geolocator
 
 class AlertSystemProvider with ChangeNotifier {
-  // Store the navigator key internally
   final GlobalKey<NavigatorState> _navigatorKey;
 
   bool _isAlertSystemActive = true;
   Timer? _alertTimer;
   Timer? _secondaryAlertTimer;
 
-  // Configurable intervals (in seconds), initialized with test values
-  int _configuredPrimaryIntervalSeconds =
-      3600; // Default to 20 seconds for testing
-  int _configuredSecondaryIntervalSeconds =
-      300; // Default to 10 seconds for testing
+  int _configuredPrimaryIntervalSeconds = 3600;
+  int _configuredSecondaryIntervalSeconds = 300;
 
   bool _isDialogShown = false;
-  bool _isSecondaryTimer = false; // Flag to identify the current timer
-  int _retryCount = 0; // Retry counter
+  bool _isSecondaryTimer = false;
+  int _retryCount = 0;
 
-  // Variable para almacenar la ubicación capturada
   String _currentLocationString = '';
-  double?
-  _currentLatitude; // Guardar latitud y longitud por separado para el proveedor
+  double? _currentLatitude;
   double? _currentLongitude;
 
-  // Constructor - accepts the navigatorKey
   AlertSystemProvider(this._navigatorKey) {
-    // Start the primary timer immediately if the system is active
-    // This assumes the provider is created when the app starts or after login
     if (_isAlertSystemActive) {
       debugPrint('AlertSystemProvider initialized. Starting primary timer.');
       _startPrimaryTimer();
     }
   }
 
-  // Getter for alert system active status
   bool get isAlertSystemActive => _isAlertSystemActive;
-
-  // Getters for configured intervals
   int get configuredPrimaryIntervalSeconds => _configuredPrimaryIntervalSeconds;
   int get configuredSecondaryIntervalSeconds =>
       _configuredSecondaryIntervalSeconds;
 
-  // Getter para la ubicación capturada (aunque solo se usará internamente para imprimir)
   String get currentLocationString => _currentLocationString;
 
-  // Setter para activar/desactivar el sistema
   set isAlertSystemActive(bool value) {
     if (_isAlertSystemActive != value) {
       _isAlertSystemActive = value;
       if (_isAlertSystemActive) {
-        // Si se activa el sistema, iniciamos los temporizadores
         _startPrimaryTimer();
       } else {
-        // Si se desactiva el sistema, cancelamos los temporizadores
         _cancelAllTimers();
       }
       notifyListeners();
     }
   }
 
-  // Setter for primary interval
   void setPrimaryInterval(int seconds) {
     _configuredPrimaryIntervalSeconds = seconds;
-    // If the primary timer is currently active, restart it with the new interval
     if (_isAlertSystemActive && !_isSecondaryTimer) {
       _startPrimaryTimer();
     }
     notifyListeners();
   }
 
-  // Setter for secondary interval
   void setSecondaryInterval(int seconds) {
     _configuredSecondaryIntervalSeconds = seconds;
-    // If the secondary timer is currently active, restart it with the new interval
     if (_isAlertSystemActive && _isSecondaryTimer) {
       _startSecondaryTimer();
     }
     notifyListeners();
   }
 
-  // Toggle the alert system on/off
   void toggleAlertSystem() {
     _isAlertSystemActive = !_isAlertSystemActive;
     if (_isAlertSystemActive) {
-      // Start the primary timer if activating
       debugPrint('Alert system toggled ON.');
       _startPrimaryTimer();
     } else {
-      // Cancel all timers if deactivating
       debugPrint('Alert system toggled OFF.');
       _cancelAllTimers();
     }
     notifyListeners();
   }
 
-  // Start the primary alert timer using the configured interval
   void _startPrimaryTimer() {
-    _cancelAllTimers(); // Cancel any existing timers
+    _cancelAllTimers();
     if (!_isAlertSystemActive) return;
 
-    _isSecondaryTimer = false; // Indicate it's the primary timer
+    _isSecondaryTimer = false;
     _alertTimer = Timer.periodic(
       Duration(seconds: _configuredPrimaryIntervalSeconds),
       (timer) {
@@ -123,9 +99,8 @@ class AlertSystemProvider with ChangeNotifier {
     );
   }
 
-  // Start the secondary alert timer using the configured interval
   void _startSecondaryTimer() {
-    _cancelAllTimers(); // Cancel any existing timers
+    _cancelAllTimers();
     if (!_isAlertSystemActive) return;
 
     _isSecondaryTimer = true;
@@ -140,11 +115,9 @@ class AlertSystemProvider with ChangeNotifier {
     );
   }
 
-  // Reset the current timer (used when user responds 'Yes')
   void resetAlertTimer() {
     debugPrint('Resetting alert timer.');
-    _cancelAllTimers(); // Cancel current timer
-    // Restart the appropriate timer based on which one was active before reset
+    _cancelAllTimers();
     if (_isSecondaryTimer) {
       _startSecondaryTimer();
     } else {
@@ -152,7 +125,6 @@ class AlertSystemProvider with ChangeNotifier {
     }
   }
 
-  // Cancel all active timers
   void _cancelAllTimers() {
     _alertTimer?.cancel();
     _secondaryAlertTimer?.cancel();
@@ -173,31 +145,27 @@ class AlertSystemProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Method to capture the current location
   Future<void> _captureCurrentLocation() async {
     try {
-      // Verificar si los servicios de ubicación están habilitados
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         debugPrint('Servicios de ubicación deshabilitados.');
         _currentLocationString =
             'Error: Servicios de ubicación deshabilitados.';
-        return; // No se puede obtener la ubicación si el servicio está deshabilitado
+        return;
       }
 
-      // Verificar el estado del permiso de ubicación
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         debugPrint('Permisos de ubicación denegados.');
         _currentLocationString = 'Error: Permisos de ubicación denegados.';
-        // En una app de producción, aquí se podría considerar solicitar el permiso de nuevo
         return;
       }
       if (permission == LocationPermission.deniedForever) {
         debugPrint('Permisos de ubicación permanentemente denegados.');
         _currentLocationString =
             'Error: Permisos de ubicación permanentemente denegados.';
-        return; // Permisos denegados permanentemente, no se puede solicitar
+        return;
       }
 
       // Obtener la posición actual con alta precisión

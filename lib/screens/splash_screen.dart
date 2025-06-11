@@ -36,7 +36,6 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Icon(
               Icons.fmd_good_outlined,
-              // Icons.fmd_good_sharp,
               size: 100,
               color: AppTheme.primaryWhite,
             ),

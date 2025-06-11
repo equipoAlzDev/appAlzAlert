@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Carga inicial de datos del usuario
+  // Inicialización
   @override
   void initState() {
     super.initState();
@@ -31,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Updated the index for AlertConfigScreen based on your provided list
   final List<Widget> _screens = [
     const MainHomeScreen(),
     const LocationHistoryScreen(),
@@ -55,14 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color.fromARGB(
-          255,
-          200,
-          255,
-          130,
-        ), // Color contrastante para el elemento seleccionado
-        unselectedItemColor:
-            Colors.white, // Color blanco para los elementos no seleccionados
+        selectedItemColor: const Color.fromARGB(255, 200, 255, 130),
+        unselectedItemColor: Colors.white,
         elevation: 8,
         items: const [
           BottomNavigationBarItem(
@@ -75,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.location_on),
             label: 'Ubicaciones',
           ),
-          // Corrected label to 'Config. Alertas' or similar if it's the config screen
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             activeIcon: Icon(Icons.settings),
@@ -103,13 +95,11 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   bool _isSendingSMS = false;
   bool _contactosCargados = false;
   final Telephony telephony = Telephony.instance;
-  // Variable para almacenar la ubicación capturada
+  // Datos de ubicación
   String _currentLocationString = '';
-  double?
-  _currentLatitude; // Guardar latitud y longitud por separado para el proveedor
+  double? _currentLatitude;
   double? _currentLongitude;
 
-  // Getter para la ubicación capturada (aunque solo se usará internamente para imprimir)
   String get currentLocationString => _currentLocationString;
 
   @override
@@ -135,26 +125,22 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   }
 
   Future<void> _initializeTelephony() async {
-    // Verificar si el dispositivo puede enviar SMS
-    // Request permissions here or earlier in your app lifecycle (recommended)
+    // Solicitar permisos de SMS
     final bool? canSendSms = await telephony.requestPhoneAndSmsPermissions;
     if (canSendSms != true) {
       debugPrint(
         'El dispositivo no puede enviar SMS o permisos no concedidos.',
       );
-      // Consider showing a persistent message to the user if permissions are denied.
     }
   }
 
-  // Corrected: Removed BuildContext argument from the call to toggleAlertSystem
   void _toggleAlertSystem(BuildContext context) {
     final alertSystemProvider = Provider.of<AlertSystemProvider>(
       context,
       listen: false,
     );
-    alertSystemProvider.toggleAlertSystem(); // Removed context argument
+    alertSystemProvider.toggleAlertSystem();
 
-    // The context is still needed here for showing the SnackBar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -171,53 +157,46 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
     );
   }
 
-  // Method to capture the current location
+  // Capturar ubicación actual
   Future<void> _captureCurrentLocation() async {
     try {
-      // Verificar si los servicios de ubicación están habilitados
+      // Verificar servicios de ubicación
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         debugPrint('Servicios de ubicación deshabilitados.');
         _currentLocationString =
             'Error: Servicios de ubicación deshabilitados.';
-        return; // No se puede obtener la ubicación si el servicio está deshabilitado
+        return;
       }
 
-      // Verificar el estado del permiso de ubicación
+      // Verificar permisos
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         debugPrint('Permisos de ubicación denegados.');
         _currentLocationString = 'Error: Permisos de ubicación denegados.';
-        // En una app de producción, aquí se podría considerar solicitar el permiso de nuevo
         return;
       }
       if (permission == LocationPermission.deniedForever) {
         debugPrint('Permisos de ubicación permanentemente denegados.');
         _currentLocationString =
             'Error: Permisos de ubicación permanentemente denegados.';
-        return; // Permisos denegados permanentemente, no se puede solicitar
+        return;
       }
 
-      // Obtener la posición actual con alta precisión
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
       _currentLatitude = position.latitude;
       _currentLongitude = position.longitude;
-      // Formatear y almacenar la ubicación
       _currentLocationString = '${position.latitude},${position.longitude}';
-      debugPrint(
-        'Ubicación capturada: $_currentLocationString',
-      ); // Imprimir en consola
+      debugPrint('Ubicación capturada: $_currentLocationString');
     } catch (e) {
       debugPrint('Error al capturar la ubicación: $e');
       _currentLocationString = 'Error al capturar ubicación: ${e.toString()}';
       _currentLatitude = null;
       _currentLongitude = null;
     }
-    // No es necesario llamar notifyListeners aquí, ya que la UI no mostrará esta variable directamente
-    // La ubicación se captura cuando se activa el diálogo.
   }
 
   Future<void> _sendEmergencySMS() async {

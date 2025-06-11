@@ -8,16 +8,12 @@ class MedicalInfoProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  // Getters
   MedicalInfoModel get medicalInfo => _medicalInfo;
   bool get isLoading => _isLoading;
   String? get error => _error;
-
-  // Referencias a Firebase
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Método para cargar la información médica del usuario actual
   Future<void> loadMedicalInfo() async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return;
@@ -38,7 +34,6 @@ class MedicalInfoProvider extends ChangeNotifier {
       if (docSnapshot.exists) {
         _medicalInfo = MedicalInfoModel.fromMap(docSnapshot.data()!);
       } else {
-        // Si no existe, inicializamos con un modelo vacío
         _medicalInfo = MedicalInfoModel.empty();
       }
     } catch (e) {
@@ -49,7 +44,6 @@ class MedicalInfoProvider extends ChangeNotifier {
     }
   }
 
-  // Método para guardar la información médica
   Future<void> saveMedicalInfo(MedicalInfoModel medicalInfo) async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return;
@@ -59,10 +53,7 @@ class MedicalInfoProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Actualizamos el modelo local
       _medicalInfo = medicalInfo;
-
-      // Guardamos en Firestore
       await _firestore
           .collection('users')
           .doc(currentUser.uid)
@@ -77,7 +68,6 @@ class MedicalInfoProvider extends ChangeNotifier {
     }
   }
 
-  // Método para añadir un medicamento
   Future<void> addMedication(MedicationModel medication) async {
     final currentMedications = List<MedicationModel>.from(
       _medicalInfo.medications,
@@ -95,7 +85,6 @@ class MedicalInfoProvider extends ChangeNotifier {
     );
   }
 
-  // Método para eliminar un medicamento
   Future<void> removeMedication(int index) async {
     final currentMedications = List<MedicationModel>.from(
       _medicalInfo.medications,
@@ -115,7 +104,6 @@ class MedicalInfoProvider extends ChangeNotifier {
     }
   }
 
-  // Método para limpiar los datos cuando el usuario cierra sesión
   void clearMedicalInfo() {
     _medicalInfo = MedicalInfoModel.empty();
     notifyListeners();

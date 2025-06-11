@@ -7,10 +7,6 @@ import 'package:telephony/telephony.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:alzalert/providers/contacto_emergencia_provider.dart';
 
-// Remove the global declaration of navigatorKey here.
-// It's no longer needed in this file.
-// late GlobalKey<NavigatorState> navigatorKey; // REMOVE THIS LINE
-
 class AlertDialogScreen extends StatefulWidget {
   final bool isRetry;
   const AlertDialogScreen({super.key, this.isRetry = false});
@@ -20,31 +16,19 @@ class AlertDialogScreen extends StatefulWidget {
 }
 
 class _AlertDialogScreenState extends State<AlertDialogScreen> {
-  // Establecemos el temporizador a 60 segundos (1 minuto)
   late int _remainingSeconds;
   Timer? _countdownTimer;
-  // We no longer need _isSendingSMS state here, as SMS is sent by the provider
-  // bool _isSendingSMS = false; // REMOVE THIS LINE
   final Telephony telephony = Telephony.instance;
-  // Número de emergencia predeterminado (usado como fallback if no contacts)
-  // REMOVED: final String _emergencyNumber = "3157042961";
 
   @override
   void initState() {
-    // The countdown timer in the dialog is always 60 seconds for user response
     _remainingSeconds = 60;
     super.initState();
-    // Iniciar sonido de alerta (puedes implementar esto más adelante)
 
-    // Iniciar el temporizador de cuenta regresiva una única vez
     _startCountdownTimer();
-
-    // Inicializar permisos de telefonía (check, not request here)
-    // This check is still useful to inform the user if SMS won't work
     _initializeTelephonyCheck();
   }
 
-  // Check telephony capabilities and permissions status (do not request here)
   Future<void> _initializeTelephonyCheck() async {
     final bool? canSendSms = await telephony.isSmsCapable;
     if (canSendSms != true) {
